@@ -150,6 +150,7 @@ def converter(input, output):
     global outputFolder
     inputFolder = input
     outputFolder = output
+    assure_path_exists(output)
     html = writeHead()
 
     for dirpath, dnames, fnames in os.walk(input):
@@ -159,7 +160,7 @@ def converter(input, output):
                 html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
 
     file_path = output + '/index.html'
-    assure_path_exists(output)
+
     with open(file_path, 'w') as file:
         html = html + """</body>
                 </html>"""    
