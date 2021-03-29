@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+__author__ = "BlipRanger"
+__version__ = "0.1.0"
+__license__ = "MIT"
+
 import json
 import os
 import markdown
