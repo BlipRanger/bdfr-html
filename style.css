@@ -11,7 +11,7 @@
     list-style: none;
     background-color: inherit;
     box-sizing: border-box;
-    color: white
+    color: white;
     -webkit-appearance: none;
     -moz-appearance: none;
     image-rendering: -webkit-optimize-contrast;
@@ -20,7 +20,7 @@
 
 body {
     font-family: 'Open Sans', Verdana;
-    background-color: rgb(35, 35, 35)
+    background-color: rgb(35, 35, 35);
 }
 
 img, video {
