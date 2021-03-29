@@ -60,7 +60,6 @@ def formatMatchingMedia(paths):
                 lines = file.readlines()
             file.close()
             for l in lines[1:]:
-                print(l)
                 if l == '---\n':
                     return (txt + '</div>')
                 else:
