@@ -109,6 +109,7 @@ def writeTopLevelComment(comment, data):
 def writeHead():
     return """<html>
             <head>
+            <style>body {background-color: rgb(35, 35, 35);}</style>
             <link rel='stylesheet' type='text/css' href='style.css'>
             <meta charset="utf-8"/>
             </head><body>"""
