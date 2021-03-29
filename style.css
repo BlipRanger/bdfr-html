@@ -23,6 +23,10 @@ body {
     background-color: rgb(35, 35, 35);
 }
 
+.links {
+    padding-bottom: 10;
+}
+
 img, video {
     max-width: 200px;
     max-height: 200px;
@@ -119,7 +123,7 @@ h1 {
 }
 
 .post .info time, .post .info span {
-    padding-right: 4px;
+    padding-right: 10px;
 }
 
 .post .links a {
