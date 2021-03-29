@@ -5,18 +5,20 @@ from datetime import datetime
 import click
 import shutil
 
-
+#Globals
 inputFolder = ''
 outputFolder = ''
 
-def jsonToHTML(file_path):
+#Loads in the json file data and adds the path of it to the dict
+def loadJson(file_path):
     f = open(file_path,)
     data = json.load(f)
     f.close()
     data['htmlPath'] = writeToHTML(data)
     return data
 
-
+#Search the input folder for media files containing the id value from an archive
+#Inputs: id name, folder to search
 def findMatchingMedia(name, folder):
     paths = []
     for dirpath, dnames, fnames in os.walk(folder):
@@ -25,7 +27,8 @@ def findMatchingMedia(name, folder):
                 paths.append(copyMedia(os.path.join(dirpath, f), f))
     return paths
 
-
+#Construct a rudamentary html image gallery from a list of image paths
+#Note: Could be improved
 def buildGallery(paths):
     html = '<div class=photoGrid><div class=row>'
     for p in paths:
@@ -33,6 +36,8 @@ def buildGallery(paths):
     html = html + """</div></div>"""
     return html
 
+#Handle the html formatting for images, videos, and text files
+#Input: list of paths to media
 def formatMatchingMedia(paths):
     if paths is None:
         return ""
@@ -59,12 +64,15 @@ def formatMatchingMedia(paths):
         return buildGallery(paths)
     return ""
 
+#Copy media from the input folder to the file structure of the html pages
 def copyMedia(mediaPath, filename):
     writeFolder = outputFolder + 'media/' 
     assure_path_exists(writeFolder)
     shutil.copyfile(mediaPath, writeFolder + filename)
     return 'media/' + filename
 
+#Handle writing replies to comments
+#Uses the writeTopLevelComment function to unroll comment/reply chains
 def writeReplies(comment, data):
     html = ''
     if not comment['replies']:
@@ -73,10 +81,12 @@ def writeReplies(comment, data):
         html = html + writeTopLevelComment(replies, data)
     return html
 
+#Convert unix time string to datetime
 def writeDatestring(time):
     time = int(time)
     return datetime.utcfromtimestamp(time).strftime('%H:%M:%S - %Y-%m-%d')
 
+#Generate the html for a comment
 def writeTopLevelComment(comment, data):
     if not comment:
         return ''
@@ -89,6 +99,7 @@ def writeTopLevelComment(comment, data):
     created=writeDatestring(comment['created_utc']), score=comment['score'], author=comment['author'],
      id=comment['id'], replies=writeReplies(comment, data), commentLink=data['permalink'] + comment['id'])
 
+#Generate the html for the html head/page start
 def writeHead():
     return """<html>
             <head>
@@ -96,6 +107,8 @@ def writeHead():
             <meta charset="utf-8"/>
             </head><body>"""
 
+#Write the html body of a given post 
+#Input: dict created from the json file
 def writePost(data):
     matchingMedia = findMatchingMedia(data['id'], inputFolder)
     content = formatMatchingMedia(matchingMedia)
@@ -120,10 +133,12 @@ def writePost(data):
          content=content, url=data.get('permalink', ''), link=data.get('url',''), title=data.get('title',''), user=data.get('author', ''),
          subreddit=getSubreddit(data.get('permalink', '')))
 
+#Extract the subreddit name from the permalink
 def getSubreddit(permalink):
     strings = permalink.split("/")
     return strings[1] + '/' + strings[2]
 
+#Write html file from given post archive info
 def writeToHTML(data):
     file_path = data['id'] + '.html'
     with open(outputFolder + file_path, 'w') as file:
@@ -137,11 +152,15 @@ def writeToHTML(data):
         file.write(html)
     return file_path
 
+#Check for path, create if does not exist
 def assure_path_exists(path):
         dir = os.path.dirname(path)
         if not os.path.exists(dir):
                 os.makedirs(dir)
 
+#Main function, loops through json files in input folder, extracts archive data into dict, 
+#formats/writes archive data and media to html files, creates a single index.html file with 
+#links to all archived posts. 
 @click.command()
 @click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
@@ -156,7 +175,7 @@ def converter(input, output):
     for dirpath, dnames, fnames in os.walk(input):
         for f in fnames:
             if f.endswith(".json"):
-                data = jsonToHTML(os.path.join(dirpath, f))
+                data = loadJson(os.path.join(dirpath, f))
                 html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
 
     file_path = output + '/index.html'
