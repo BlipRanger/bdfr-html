@@ -131,7 +131,7 @@ def writePost(data):
         <div class="links">
         <a href="{local_link}"> link</a> <a href="{link}">reddit link</a> <a href="https://www.reddit.com{url}"> Content Link</a> </div>
         </div>
-        <time>{time}</time><a href='reddit.com/{subreddit}'><span class="subreddit">   {subreddit}   </span></a><a href='reddit.com/u/{user}'><span class="user">   u/{user}   </span></a><br>
+        <time>{time}</time><a href='https://reddit.com/{subreddit}'><span class="subreddit">   {subreddit}   </span></a><a href='https://reddit.com/u/{user}'><span class="user">   u/{user}   </span></a><br>
         <div class=content>{content}</p></div>
         </div>
 
