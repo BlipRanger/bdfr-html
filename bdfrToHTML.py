@@ -132,8 +132,9 @@ def writePost(data):
                     <a href="{local_link}"> link</a> <a href="{link}">reddit link</a> <a href="https://www.reddit.com{url}"> Content Link</a> 
                 </div>
                 <time>{time}</time><a href='https://reddit.com/{subreddit}'><span class="subreddit">{subreddit}</span></a><a href='https://reddit.com/u/{user}'><span class="user">u/{user}</span></a>
-            <div class=content>{content}</div>
             </div>
+            <div class=content>{content}</div>
+            
         </div>
 
         """.format(time=writeDatestring(data.get('time', '1616957979')), local_link=local_link, submission=data.get('id', ''),
