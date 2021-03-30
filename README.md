@@ -6,4 +6,4 @@ Currently only supports the json version of the archive output.
 
 **Usage**
 
-`python3 bdfrToHTML.py --input ./location/of/archive/and/downloads --output /../html`
+`python3 bdfrToHTML.py --input ./location/of/archive/and/downloads --output /../html/`
