@@ -102,7 +102,8 @@ def writeTopLevelComment(comment, data):
     <div class=author>u/{author}</div></div>
     <p>{body}</p><div class=reply>{replies}</div></div>""".format(body=markdown.markdown(comment['body']), 
     created=writeDatestring(comment['created_utc']), score=comment['score'], author=comment['author'],
-     id=comment['id'], replies=writeReplies(comment, data), commentLink=data['permalink'] + comment['id'])
+     id=comment['id'], replies=writeReplies(comment, data), commentLink=data.get('permalink','') + comment['id'])
+
 
 #Generate the html for the html head/page start
 def writeHead():
@@ -141,6 +142,32 @@ def writePost(data):
          content=content, url=data.get('permalink', ''), link=data.get('url',''), title=data.get('title',''), user=data.get('author', ''),
          subreddit=getSubreddit(data.get('permalink', '')))
 
+#Function to write a saved comment in a 'post' format
+def writeCommentPost(comment):
+    if not comment:
+        return ''
+    #Generate Permalink
+    permalink = 'https://www.reddit.com/r/{subreddit}/comments/{submission}/{title}/{id}'.format(id=comment['id'],
+     submission=comment['submission'], title=comment['submission_title'], subreddit=comment['subreddit'])
+
+    return """
+        <div class=post>
+            <h1>Comment on {title}</h1>
+            <div class="info">
+                <div class="links">
+                    <a href="{url}"> Reddit Link</a> 
+                </div>
+                <time>{time}</time><a href='https://reddit.com/{subreddit}'><span class="subreddit">{subreddit}</span></a><a href='https://reddit.com/u/{user}'><span class="user">u/{user}</span></a>
+            </div>
+            <div class=content>{content}</div>
+            
+        </div>
+
+        """.format(time=writeDatestring(comment.get('created_utc', '1616957979')), submission=comment.get('id', ''),
+         content=markdown.markdown(comment.get('body', '')), url=permalink, link=permalink, title=comment.get('submission_title',''), user=comment.get('author', ''),
+         subreddit=comment.get('subreddit', ''))
+             
+
 #Extract the subreddit name from the permalink
 def getSubreddit(permalink):
     strings = permalink.split("/")
@@ -151,12 +178,20 @@ def writeToHTML(data):
     file_path = data['id'] + '.html'
     with open(outputFolder + file_path, 'w') as file:
         html = writeHead()
-        html = html + writePost(data) + "<h2>Comments</h2><div class=comments>"
-        for c in data['comments']:
-            html = html + writeTopLevelComment(c, data)
+        if data.get('parent_id', None) is None:
+            html = html + writePost(data) + "<h2>Comments</h2><div class=comments>"
+            for c in data['comments']:
+                html = html + writeTopLevelComment(c, data)
 
-            html = html + """</div></body>
-                    </html>"""    
+                html = html + """</div></body>
+                        </html>"""    
+        else:
+            html = html + writeCommentPost(data) + "<h2>Comments</h2><div class=comments>"
+            for c in data['replies']:
+                html = html + writeTopLevelComment(c, data)
+
+                html = html + """</div></body>
+                        </html>"""
         file.write(html)
     return file_path
 
@@ -184,7 +219,10 @@ def converter(input, output):
         for f in fnames:
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
-                html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
+                if data.get('parent_id', None) is None:
+                    html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
+                else:
+                    html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
 
     file_path = output + '/index.html'
 
