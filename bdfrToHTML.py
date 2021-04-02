@@ -157,7 +157,7 @@ def writeCommentPost(comment):
                 <div class="links">
                     <a href="{url}"> Reddit Link</a> 
                 </div>
-                <time>{time}</time><a href='https://reddit.com/{subreddit}'><span class="subreddit">{subreddit}</span></a><a href='https://reddit.com/u/{user}'><span class="user">u/{user}</span></a>
+                <time>{time}</time><a href='https://reddit.com/r/{subreddit}'><span class="subreddit">{subreddit}</span></a><a href='https://reddit.com/u/{user}'><span class="user">u/{user}</span></a>
             </div>
             <div class=content>{content}</div>
             
