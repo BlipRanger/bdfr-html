@@ -154,7 +154,7 @@ def writePost(data):
             
         </div>
 
-        """.format(time=writeDatestring(data.get('time', '1616957979')), local_link=local_link, submission=data.get('id', ''),
+        """.format(time=writeDatestring(data.get('created_utc', '1616957979')), local_link=local_link, submission=data.get('id', ''),
          content=content, url=data.get('permalink', ''), link=data.get('url',''), title=data.get('title',''), user=data.get('author', ''),
          subreddit=getSubreddit(data.get('permalink', '')))
 
