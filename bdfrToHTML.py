@@ -93,6 +93,7 @@ def writeDatestring(time):
     time = int(time)
     return datetime.utcfromtimestamp(time).strftime('%H:%M:%S - %Y-%m-%d')
 
+#Recover deleted comments via pushshift
 def recoverDeletedComment(comment):
     response = requests.get("https://api.pushshift.io/reddit/comment/search?ids={id}".format(id=comment.get('id','')))
     data = response.json()['data']
@@ -232,23 +233,41 @@ def converter(input, output, recover_comments):
     global recoverComments
     inputFolder = input
     outputFolder = output
-    recoverComments = recover_comments
+    recoverComments = recover_commentsf
     assure_path_exists(output)
     html = writeHead()
-
+    postCount = 0
+    pageCount = 1
     for dirpath, dnames, fnames in os.walk(input):
         for f in fnames:
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
+                if postCount == 25:
+                    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+                    with open(file_path, 'w') as file:
+                        html = html + """<div class=nextPage><a href='page{pageCount}.html'>Next Page</a></div></body>
+                                </html>""".format(pageCount=pageCount)
+                        file.write(html)
+                    html = writeHead()
+                    pageCount = pageCount + 1
                 if data.get('parent_id', None) is None:
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
                 else:
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
+                postCount = postCount + 1
+
+    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+    with open(file_path, 'w') as file:
+        html = html + """<div class=nextPage><a href='page{pageCount}.html'>Next Page</a></div></body>
+                </html>""".format(pageCount=pageCount)
+        file.write(html)
+    html = writeHead()
+
 
     file_path = output + '/index.html'
-
     with open(file_path, 'w') as file:
-        html = html + """</body>
+        html = html + """
+        <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
                 </html>"""    
         file.write(html)
     shutil.copyfile('style.css', outputFolder + 'style.css')
