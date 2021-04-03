@@ -233,7 +233,7 @@ def converter(input, output, recover_comments):
     global recoverComments
     inputFolder = input
     outputFolder = output
-    recoverComments = recover_commentsf
+    recoverComments = recover_comments
     assure_path_exists(output)
     html = writeHead()
     postCount = 0
