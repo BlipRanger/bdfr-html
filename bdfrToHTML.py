@@ -10,10 +10,12 @@ import markdown
 from datetime import datetime
 import click
 import shutil
+import requests
 
 #Globals
 inputFolder = ''
 outputFolder = ''
+recoverComments = False
 
 #Loads in the json file data and adds the path of it to the dict
 def loadJson(file_path):
@@ -91,18 +93,32 @@ def writeDatestring(time):
     time = int(time)
     return datetime.utcfromtimestamp(time).strftime('%H:%M:%S - %Y-%m-%d')
 
+def recoverDeletedComment(comment):
+    response = requests.get("https://api.pushshift.io/reddit/comment/search?ids={id}".format(id=comment.get('id','')))
+    data = response.json()['data']
+    if len(data) == 1:
+        revComment = data[0]
+        comment['author'] = revComment['author']
+        comment['body'] = revComment['body']
+        comment['score'] = revComment['score']
+        comment['recovered'] = 'recovered'
+    return comment
+
 #Generate the html for a comment
 def writeTopLevelComment(comment, data):
     if not comment:
         return ''
+    if recoverComments and (comment.get('author', '') == 'DELETED' or comment.get('body', '') == '[removed]'):
+        comment = recoverDeletedComment(comment) 
     return """<div id={id} class="comment">
-    <div class="info">
+    <div class="info {recovered}">
     <a href="https://www.reddit.com{commentLink}"><div class="time">{created}</div></a>
     <div class="score">({score})</div>
     <div class=author>u/{author}</div></div>
     <p>{body}</p><div class=reply>{replies}</div></div>""".format(body=markdown.markdown(comment['body']), 
     created=writeDatestring(comment['created_utc']), score=comment['score'], author=comment['author'],
-     id=comment['id'], replies=writeReplies(comment, data), commentLink=data.get('permalink','') + comment['id'])
+     id=comment['id'], replies=writeReplies(comment, data), commentLink=data.get('permalink','') + comment['id'],
+     recovered=comment.get('recovered', ''))
 
 
 #Generate the html for the html head/page start
@@ -146,14 +162,16 @@ def writePost(data):
 def writeCommentPost(comment):
     if not comment:
         return ''
+    if recoverComments and (comment.get('author', '') == 'DELETED' or comment.get('body', '') == '[removed]'):
+        comment = recoverDeletedComment(comment) 
     #Generate Permalink
     permalink = 'https://www.reddit.com/r/{subreddit}/comments/{submission}/{title}/{id}'.format(id=comment['id'],
      submission=comment['submission'], title=comment['submission_title'], subreddit=comment['subreddit'])
 
     return """
-        <div class=post>
+        <div class="post">
             <h1>Comment on {title}</h1>
-            <div class="info">
+            <div class="info {recovered}">
                 <div class="links">
                     <a href="{url}"> Reddit Link</a> 
                 </div>
@@ -165,7 +183,7 @@ def writeCommentPost(comment):
 
         """.format(time=writeDatestring(comment.get('created_utc', '1616957979')), submission=comment.get('id', ''),
          content=markdown.markdown(comment.get('body', '')), url=permalink, link=permalink, title=comment.get('submission_title',''), user=comment.get('author', ''),
-         subreddit=comment.get('subreddit', ''))
+         subreddit=comment.get('subreddit', ''), recovered=comment.get('recovered', ''))
              
 
 #Extract the subreddit name from the permalink
@@ -207,11 +225,14 @@ def assure_path_exists(path):
 @click.command()
 @click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
-def converter(input, output):
+@click.option('--recover_comments', default=False, help='Should we attempt to recover deleted comments?')
+def converter(input, output, recover_comments):
     global inputFolder
     global outputFolder
+    global recoverComments
     inputFolder = input
     outputFolder = output
+    recoverComments = recover_comments
     assure_path_exists(output)
     html = writeHead()
 

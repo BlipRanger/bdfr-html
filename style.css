@@ -17,6 +17,9 @@
     image-rendering: -webkit-optimize-contrast;
 }
 
+div.info.recovered *{
+    color: coral;
+}
 
 body {
     font-family: 'Open Sans', Verdana;
