@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 inputFolder = ''
 outputFolder = ''
 recoverComments = False
-context = True
+context = False
 
 #Loads in the json file data and adds the path of it to the dict
 def loadJson(file_path):
