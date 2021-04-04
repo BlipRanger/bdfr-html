@@ -52,10 +52,10 @@ def formatMatchingMedia(paths):
     if len(paths) == 1:
         path = paths[0]
 
-        if path.endswith('jpg') or path.endswith('jpeg') or path.endswith('png'):
+        if path.endswith('jpg') or path.endswith('jpeg') or path.endswith('png') or path.endswith('gif'):
             return '<a href={path}><img src={path}></a>'.format(path=path)
         elif path.endswith('m4a') or path.endswith('mp4') or path.endswith('mkv'):
-            return '<video width="320" height="240" controls><source src="{path}"></video>'.format(path=path)
+            return '<video max-height="500" controls><source src="{path}"></video>'.format(path=path)
         elif path.endswith('txt'):
             txt = '<div>'
             with open(outputFolder + path, 'r') as file:
@@ -245,11 +245,14 @@ def converter(input, output, recover_comments):
                 if postCount == 25:
                     file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
                     with open(file_path, 'w') as file:
-                        html = html + """<div class=nextPage><a href='page{pageCount}.html'>Next Page</a></div></body>
-                                </html>""".format(pageCount=pageCount)
+                        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                         </body>
+                </html>""".format(previous=pageCount-1, next=pageCount+1)
                         file.write(html)
                     html = writeHead()
                     pageCount = pageCount + 1
+                    postCount = 0
                 if data.get('parent_id', None) is None:
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
                 else:
@@ -258,8 +261,10 @@ def converter(input, output, recover_comments):
 
     file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
     with open(file_path, 'w') as file:
-        html = html + """<div class=nextPage><a href='page{pageCount}.html'>Next Page</a></div></body>
-                </html>""".format(pageCount=pageCount)
+        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                         </body>
+                </html>""".format(previous=pageCount-1, next=pageCount+1)
         file.write(html)
     html = writeHead()
 

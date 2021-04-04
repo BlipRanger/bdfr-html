@@ -21,6 +21,16 @@ div.info.recovered *{
     color: coral;
 }
 
+.footer {
+    text-align: center;
+    padding: 50;
+    font-size: 25;
+}
+
+.nextPage, .previousPage {
+    padding: 10
+}
+
 body {
     font-family: 'Open Sans', Verdana;
     background-color: rgb(35, 35, 35);
@@ -31,8 +41,7 @@ body {
 }
 
 img, video {
-    max-width: 200px;
-    max-height: 200px;
+    max-height: 500px;
     cursor: pointer;
 }
 
