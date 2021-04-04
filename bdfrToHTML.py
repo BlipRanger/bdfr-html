@@ -12,6 +12,7 @@ import click
 import shutil
 import requests
 import logging
+import subprocess
 
 #Logging Setup
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +22,7 @@ logging.basicConfig(level=logging.INFO)
 inputFolder = ''
 outputFolder = ''
 recoverComments = False
+context = True
 
 #Loads in the json file data and adds the path of it to the dict
 def loadJson(file_path):
@@ -83,6 +85,7 @@ def copyMedia(mediaPath, filename):
     assure_path_exists(writeFolder)
     if filename.endswith('mp4'):
         try:
+            #This fixes mp4 files that won't play in browsers
             os.system("ffmpeg -nostats -loglevel 0 -i {input} -c:v copy -c:a copy -y {output}".format(input=mediaPath, output=(writeFolder + filename)))
         except:
             logging.error('FFMPEG failed')
@@ -118,6 +121,28 @@ def recoverDeletedComment(comment):
         comment['recovered'] = 'recovered'
         logging.debug('Recovered ' + comment.get('id','') + ' from pushshift')
     return comment
+
+#Requires bdfr V2
+def archiveContext(link):
+    assure_path_exists(inputFolder + "context/")
+    data={}
+    try:
+        logging.info("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
+        logging.info("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
+        subprocess.call(["python3.9", "-m", "bulkredditdownloader", "archive", "-l", link, inputFolder + "context"])
+        subprocess.call(["python3.9", "-m", "bulkredditdownloader", "download", "-l", link, "--file-scheme", "{{POSTID}}", inputFolder + "context"])
+        #os.system("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
+        #os.system("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
+    except:
+        logging.error("Failed to archive context")
+    for dirpath, dnames, fnames in os.walk(inputFolder + "context"):
+            for f in fnames:
+                print(f)
+                if f.endswith(".json"):
+                    data = loadJson(os.path.join(dirpath, f))
+    shutil.rmtree(inputFolder + "context/")
+    return data['htmlPath']
+
 
 #Generate the html for a comment
 def writeTopLevelComment(comment, data):
@@ -179,16 +204,21 @@ def writeCommentPost(comment):
         return ''
     if recoverComments and (comment.get('author', '') == 'DELETED' or comment.get('body', '') == '[removed]'):
         comment = recoverDeletedComment(comment) 
+
     #Generate Permalink
     permalink = 'https://www.reddit.com/r/{subreddit}/comments/{submission}/{title}/{id}'.format(id=comment['id'],
      submission=comment['submission'], title=comment['submission_title'], subreddit=comment['subreddit'])
+
+    contextLink = ''
+    if context:
+        contextLink = archiveContext(permalink)
 
     return """
         <div class="post">
             <h1>Comment on {title}</h1>
             <div class="info {recovered}">
                 <div class="links">
-                    <a href="{url}"> Reddit Link</a> 
+                    <a href="{url}"> Reddit Link</a><a href={contextLink}>Context Link</a> 
                 </div>
                 <time>{time}</time><a href='https://reddit.com/r/{subreddit}'><span class="subreddit">{subreddit}</span></a><a href='https://reddit.com/u/{user}'><span class="user">u/{user}</span></a>
             </div>
@@ -198,7 +228,7 @@ def writeCommentPost(comment):
 
         """.format(time=writeDatestring(comment.get('created_utc', '1616957979')), submission=comment.get('id', ''),
          content=markdown.markdown(comment.get('body', '')), url=permalink, link=permalink, title=comment.get('submission_title',''), user=comment.get('author', ''),
-         subreddit=comment.get('subreddit', ''), recovered=comment.get('recovered', ''))
+         subreddit=comment.get('subreddit', ''), recovered=comment.get('recovered', ''), contextLink=contextLink)
              
 
 #Extract the subreddit name from the permalink
@@ -241,13 +271,20 @@ def assure_path_exists(path):
 @click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
 @click.option('--recover_comments', default=False, help='Should we attempt to recover deleted comments?')
-def converter(input, output, recover_comments):
+@click.option('--archive_context', default=False, help='Should we attempt to archive the contextual post for saved comments?')
+def converter(input, output, recover_comments, archive_context):
     global inputFolder
     global outputFolder
     global recoverComments
+    global context
+
+    #Set globals (there is probably a better way to do this)
     inputFolder = input
     outputFolder = output
     recoverComments = recover_comments
+    context = archive_context
+
+    #Begin main process
     assure_path_exists(output)
     html = writeHead()
     postCount = 0
