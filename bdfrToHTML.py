@@ -127,12 +127,10 @@ def archiveContext(link):
     assure_path_exists(inputFolder + "context/")
     data={}
     try:
-        logging.info("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
-        logging.info("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
+        logging.debug("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
+        logging.debug("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
         subprocess.call(["python3.9", "-m", "bulkredditdownloader", "archive", "-l", link, inputFolder + "context"])
         subprocess.call(["python3.9", "-m", "bulkredditdownloader", "download", "-l", link, "--file-scheme", "{{POSTID}}", inputFolder + "context"])
-        #os.system("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
-        #os.system("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
     except:
         logging.error("Failed to archive context")
     for dirpath, dnames, fnames in os.walk(inputFolder + "context"):
