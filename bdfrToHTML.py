@@ -11,6 +11,11 @@ from datetime import datetime
 import click
 import shutil
 import requests
+import logging
+
+#Logging Setup
+logging.basicConfig(level=logging.INFO)
+
 
 #Globals
 inputFolder = ''
@@ -22,6 +27,7 @@ def loadJson(file_path):
     f = open(file_path,)
     data = json.load(f)
     f.close()
+    logging.debug('Loaded ' + file_path)
     data['htmlPath'] = writeToHTML(data)
     return data
 
@@ -75,7 +81,14 @@ def formatMatchingMedia(paths):
 def copyMedia(mediaPath, filename):
     writeFolder = outputFolder + 'media/' 
     assure_path_exists(writeFolder)
-    shutil.copyfile(mediaPath, writeFolder + filename)
+    if filename.endswith('mp4'):
+        try:
+            os.system("ffmpeg -nostats -loglevel 0 -i {input} -c:v copy -c:a copy -y {output}".format(input=mediaPath, output=(writeFolder + filename)))
+        except:
+            logging.error('FFMPEG failed')
+    else:
+        shutil.copyfile(mediaPath, writeFolder + filename)
+    logging.debug('Moved ' + mediaPath + ' to ' + writeFolder +filename)
     return 'media/' + filename
 
 #Handle writing replies to comments
@@ -103,6 +116,7 @@ def recoverDeletedComment(comment):
         comment['body'] = revComment['body']
         comment['score'] = revComment['score']
         comment['recovered'] = 'recovered'
+        logging.debug('Recovered ' + comment.get('id','') + ' from pushshift')
     return comment
 
 #Generate the html for a comment
