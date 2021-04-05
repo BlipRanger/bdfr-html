@@ -52,6 +52,16 @@ def buildGallery(paths):
     html = html + """</div></div>"""
     return html
 
+#Extract/convert markdown from saved selfpost
+def parseSelfPost(filePath):
+    txt = '<div>'
+    with open(filePath, 'r') as file:
+        content = file.read()
+    file.close()
+    #Strip first and last lines
+    content = content[content.find('\n')+1:content.rfind('\n')]
+    return markdown.markdown(content)
+
 #Handle the html formatting for images, videos, and text files
 #Input: list of paths to media
 def formatMatchingMedia(paths):
@@ -65,16 +75,7 @@ def formatMatchingMedia(paths):
         elif path.endswith('m4a') or path.endswith('mp4') or path.endswith('mkv'):
             return '<video max-height="500" controls><source src="{path}"></video>'.format(path=path)
         elif path.endswith('txt'):
-            txt = '<div>'
-            with open(outputFolder + path, 'r') as file:
-                lines = file.readlines()
-            file.close()
-            for l in lines[1:]:
-                if l == '---\n':
-                    return (txt + '</div>')
-                else:
-                    txt = txt + l
-            return markdown.markdown(txt)
+            return parseSelfPost(outputFolder + path)
     elif(len(paths) > 1):
         return buildGallery(paths)
     return ""
