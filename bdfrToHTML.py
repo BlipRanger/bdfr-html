@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 __author__ = "BlipRanger"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __license__ = "MIT"
 
 import json
@@ -11,17 +11,25 @@ from datetime import datetime
 import click
 import shutil
 import requests
+import logging
+import subprocess
+
+#Logging Setup
+logging.basicConfig(level=logging.INFO)
+
 
 #Globals
 inputFolder = ''
 outputFolder = ''
 recoverComments = False
+context = False
 
 #Loads in the json file data and adds the path of it to the dict
 def loadJson(file_path):
     f = open(file_path,)
     data = json.load(f)
     f.close()
+    logging.debug('Loaded ' + file_path)
     data['htmlPath'] = writeToHTML(data)
     return data
 
@@ -44,6 +52,16 @@ def buildGallery(paths):
     html = html + """</div></div>"""
     return html
 
+#Extract/convert markdown from saved selfpost
+def parseSelfPost(filePath):
+    txt = '<div>'
+    with open(filePath, 'r') as file:
+        content = file.read()
+    file.close()
+    #Strip first and last lines
+    content = content[content.find('\n')+1:content.rfind('\n')]
+    return markdown.markdown(content)
+
 #Handle the html formatting for images, videos, and text files
 #Input: list of paths to media
 def formatMatchingMedia(paths):
@@ -52,21 +70,12 @@ def formatMatchingMedia(paths):
     if len(paths) == 1:
         path = paths[0]
 
-        if path.endswith('jpg') or path.endswith('jpeg') or path.endswith('png'):
+        if path.endswith('jpg') or path.endswith('jpeg') or path.endswith('png') or path.endswith('gif'):
             return '<a href={path}><img src={path}></a>'.format(path=path)
         elif path.endswith('m4a') or path.endswith('mp4') or path.endswith('mkv'):
-            return '<video width="320" height="240" controls><source src="{path}"></video>'.format(path=path)
+            return '<video max-height="500" controls><source src="{path}"></video>'.format(path=path)
         elif path.endswith('txt'):
-            txt = '<div>'
-            with open(outputFolder + path, 'r') as file:
-                lines = file.readlines()
-            file.close()
-            for l in lines[1:]:
-                if l == '---\n':
-                    return (txt + '</div>')
-                else:
-                    txt = txt + l
-            return markdown.markdown(txt)
+            return parseSelfPost(outputFolder + path)
     elif(len(paths) > 1):
         return buildGallery(paths)
     return ""
@@ -75,7 +84,15 @@ def formatMatchingMedia(paths):
 def copyMedia(mediaPath, filename):
     writeFolder = outputFolder + 'media/' 
     assure_path_exists(writeFolder)
-    shutil.copyfile(mediaPath, writeFolder + filename)
+    if filename.endswith('mp4'):
+        try:
+            #This fixes mp4 files that won't play in browsers
+            os.system("ffmpeg -nostats -loglevel 0 -i {input} -c:v copy -c:a copy -y {output}".format(input=mediaPath, output=(writeFolder + filename)))
+        except:
+            logging.error('FFMPEG failed')
+    else:
+        shutil.copyfile(mediaPath, writeFolder + filename)
+    logging.debug('Moved ' + mediaPath + ' to ' + writeFolder +filename)
     return 'media/' + filename
 
 #Handle writing replies to comments
@@ -93,6 +110,7 @@ def writeDatestring(time):
     time = int(time)
     return datetime.utcfromtimestamp(time).strftime('%H:%M:%S - %Y-%m-%d')
 
+#Recover deleted comments via pushshift
 def recoverDeletedComment(comment):
     response = requests.get("https://api.pushshift.io/reddit/comment/search?ids={id}".format(id=comment.get('id','')))
     data = response.json()['data']
@@ -102,7 +120,28 @@ def recoverDeletedComment(comment):
         comment['body'] = revComment['body']
         comment['score'] = revComment['score']
         comment['recovered'] = 'recovered'
+        logging.debug('Recovered ' + comment.get('id','') + ' from pushshift')
     return comment
+
+#Requires bdfr V2
+def archiveContext(link):
+    assure_path_exists(inputFolder + "context/")
+    data={}
+    try:
+        logging.debug("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
+        logging.debug("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
+        subprocess.call(["python3.9", "-m", "bulkredditdownloader", "archive", "-l", link, inputFolder + "context"])
+        subprocess.call(["python3.9", "-m", "bulkredditdownloader", "download", "-l", link, "--file-scheme", "{{POSTID}}", inputFolder + "context"])
+    except:
+        logging.error("Failed to archive context")
+    for dirpath, dnames, fnames in os.walk(inputFolder + "context"):
+            for f in fnames:
+                print(f)
+                if f.endswith(".json"):
+                    data = loadJson(os.path.join(dirpath, f))
+    shutil.rmtree(inputFolder + "context/")
+    return data['htmlPath']
+
 
 #Generate the html for a comment
 def writeTopLevelComment(comment, data):
@@ -164,16 +203,21 @@ def writeCommentPost(comment):
         return ''
     if recoverComments and (comment.get('author', '') == 'DELETED' or comment.get('body', '') == '[removed]'):
         comment = recoverDeletedComment(comment) 
+
     #Generate Permalink
     permalink = 'https://www.reddit.com/r/{subreddit}/comments/{submission}/{title}/{id}'.format(id=comment['id'],
      submission=comment['submission'], title=comment['submission_title'], subreddit=comment['subreddit'])
+
+    contextLink = ''
+    if context:
+        contextLink = archiveContext(permalink)
 
     return """
         <div class="post">
             <h1>Comment on {title}</h1>
             <div class="info {recovered}">
                 <div class="links">
-                    <a href="{url}"> Reddit Link</a> 
+                    <a href="{url}"> Reddit Link</a><a href={contextLink}>Context Link</a> 
                 </div>
                 <time>{time}</time><a href='https://reddit.com/r/{subreddit}'><span class="subreddit">{subreddit}</span></a><a href='https://reddit.com/u/{user}'><span class="user">u/{user}</span></a>
             </div>
@@ -183,7 +227,7 @@ def writeCommentPost(comment):
 
         """.format(time=writeDatestring(comment.get('created_utc', '1616957979')), submission=comment.get('id', ''),
          content=markdown.markdown(comment.get('body', '')), url=permalink, link=permalink, title=comment.get('submission_title',''), user=comment.get('author', ''),
-         subreddit=comment.get('subreddit', ''), recovered=comment.get('recovered', ''))
+         subreddit=comment.get('subreddit', ''), recovered=comment.get('recovered', ''), contextLink=contextLink)
              
 
 #Extract the subreddit name from the permalink
@@ -226,29 +270,59 @@ def assure_path_exists(path):
 @click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
 @click.option('--recover_comments', default=False, help='Should we attempt to recover deleted comments?')
-def converter(input, output, recover_comments):
+@click.option('--archive_context', default=False, help='Should we attempt to archive the contextual post for saved comments?')
+def converter(input, output, recover_comments, archive_context):
     global inputFolder
     global outputFolder
     global recoverComments
+    global context
+
+    #Set globals (there is probably a better way to do this)
     inputFolder = input
     outputFolder = output
     recoverComments = recover_comments
+    context = archive_context
+
+    #Begin main process
     assure_path_exists(output)
     html = writeHead()
-
+    postCount = 0
+    pageCount = 1
     for dirpath, dnames, fnames in os.walk(input):
         for f in fnames:
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
+                if postCount == 25:
+                    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+                    with open(file_path, 'w') as file:
+                        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                         </body>
+                </html>""".format(previous=pageCount-1, next=pageCount+1)
+                        file.write(html)
+                    html = writeHead()
+                    pageCount = pageCount + 1
+                    postCount = 0
                 if data.get('parent_id', None) is None:
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
                 else:
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
+                postCount = postCount + 1
+
+    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+    with open(file_path, 'w') as file:
+        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                         </body>
+                </html>""".format(previous=pageCount-1, next=pageCount+1)
+        file.write(html)
+    html = writeHead()
+
 
     file_path = output + '/index.html'
-
     with open(file_path, 'w') as file:
-        html = html + """</body>
+        html = html + """
+        <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
                 </html>"""    
         file.write(html)
     shutil.copyfile('style.css', outputFolder + 'style.css')
