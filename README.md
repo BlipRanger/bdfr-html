@@ -1,5 +1,5 @@
 # bdfr-html
-Converts the output of the [bulk downloader for reddit (V2)](https://github.com/aliparlakci/bulk-downloader-for-reddit/tree/v2)  to a set of HTML pages. 
+Converts the output of the [bulk downloader for reddit (V2)](https://github.com/aliparlakci/bulk-downloader-for-reddit)  to a set of HTML pages. 
 
 Currently requires that you run both the archive and the download portions of the BDfR bulk downloader script and that the names of the downloaded files contain the post id (this is default).
 Currently only supports the json version of the archive output from BDfR V2. 
