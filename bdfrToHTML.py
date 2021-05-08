@@ -125,13 +125,14 @@ def recoverDeletedComment(comment):
 
 #Requires bdfr V2
 def archiveContext(link):
-    assure_path_exists(inputFolder + "context/")
+    path = os.path.join(inputFolder, "context/")
+    assure_path_exists(path)
     data={}
     try:
         #logging.debug("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
         #logging.debug("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
-        subprocess.call(["python3.9", "-m", "bdfr", "archive", "-l", link, inputFolder + "context"])
-        subprocess.call(["python3.9", "-m", "bdfr", "download", "-l", link, "--file-scheme", "{{POSTID}}", inputFolder + "context"])
+        subprocess.call(["python3.9", "-m", "bdfr", "archive", "-l", link, path])
+        subprocess.call(["python3.9", "-m", "bdfr", "download", "-l", link, "--file-scheme", "{{POSTID}}", path])
     except:
         logging.error("Failed to archive context")
     for dirpath, dnames, fnames in os.walk(inputFolder + "context"):
@@ -278,13 +279,15 @@ def converter(input, output, recover_comments, archive_context):
     global context
 
     #Set globals (there is probably a better way to do this)
-    inputFolder = input
-    outputFolder = output
+    inputFolder = os.path.join(input, '')
+    outputFolder = os.path.join(output, '')
     recoverComments = recover_comments
     context = archive_context
 
     #Begin main process
     assure_path_exists(output)
+    if not os.path.isdir(inputFolder):
+        raise ValueError('Input folder does not exist') 
     html = writeHead()
     postCount = 0
     pageCount = 1
@@ -293,7 +296,7 @@ def converter(input, output, recover_comments, archive_context):
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
                 if postCount == 25:
-                    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+                    file_path = os.path.join(output, 'page{pageCount}.html'.format(pageCount=pageCount))
                     with open(file_path, 'w') as file:
                         html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
                          <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
@@ -309,7 +312,7 @@ def converter(input, output, recover_comments, archive_context):
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
                 postCount = postCount + 1
 
-    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+    file_path = os.path.join(output, 'page{pageCount}.html'.format(pageCount=pageCount))
     with open(file_path, 'w') as file:
         html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
                          <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
@@ -319,7 +322,7 @@ def converter(input, output, recover_comments, archive_context):
     html = writeHead()
 
 
-    file_path = output + '/index.html'
+    file_path = os.path.join(output, 'index.html')
     with open(file_path, 'w') as file:
         html = html + """
         <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
