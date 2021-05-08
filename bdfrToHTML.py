@@ -75,14 +75,14 @@ def formatMatchingMedia(paths):
         elif path.endswith('m4a') or path.endswith('mp4') or path.endswith('mkv'):
             return '<video max-height="500" controls><source src="{path}"></video>'.format(path=path)
         elif path.endswith('txt'):
-            return parseSelfPost(outputFolder + path)
+            return parseSelfPost(os.path.join(outputFolder, path))
     elif(len(paths) > 1):
         return buildGallery(paths)
     return ""
 
 #Copy media from the input folder to the file structure of the html pages
 def copyMedia(mediaPath, filename):
-    writeFolder = outputFolder + 'media/' 
+    writeFolder = os.path.join(outputFolder, 'media/')
     assure_path_exists(writeFolder)
     if filename.endswith('mp4'):
         try:
@@ -239,7 +239,8 @@ def getSubreddit(permalink):
 #Write html file from given post archive info
 def writeToHTML(data):
     file_path = data['id'] + '.html'
-    with open(outputFolder + file_path, 'w') as file:
+    path = os.path.join(outputFolder, file_path)
+    with open(path, 'w') as file:
         html = writeHead()
         if data.get('parent_id', None) is None:
             html = html + writePost(data) + "<h2>Comments</h2><div class=comments>"
@@ -328,7 +329,7 @@ def converter(input, output, recover_comments, archive_context):
         <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
                 </html>"""    
         file.write(html)
-    shutil.copyfile('style.css', outputFolder + 'style.css')
+    shutil.copyfile('style.css', os.path.join(outputFolder, 'style.css'))
 
 if __name__ == '__main__':
     converter()
