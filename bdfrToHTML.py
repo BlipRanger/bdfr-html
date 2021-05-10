@@ -287,7 +287,7 @@ def main():
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
                 #Only do this if we haven't already
-                if data['id'] not in datalist:
+                if (data['id'] + "\n") not in datalist:
                     data['htmlPath'] = writeToHTML(data)
                     if postCount == 25:
                         file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
