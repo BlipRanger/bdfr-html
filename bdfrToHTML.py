@@ -16,7 +16,11 @@ import subprocess
 import time
 
 #Logging Setup
-logging.basicConfig(level=logging.INFO)
+level = os.environ['BDFRH_LOGLEVEL']
+if level == "DEBUG":
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 
 #Globals
@@ -39,11 +43,12 @@ def findMatchingMedia(name, folder):
     paths = []
 
     #Don't copy if we already have it
-    existingMedia = os.path.join(outputFolder, media)
+    existingMedia = os.path.join(outputFolder, "media/")
     for dirpath, dnames, fnames in os.walk(existingMedia):
         for f in fnames:
             if (name) in f and not f.endswith('.json'):
-                paths.append(os.path.join(dirpath, f))
+                logging.debug("Find Matching Media found: " + dirpath + f)
+                paths.append(os.path.join('media/', f))
     if len(paths) > 0:
         logging.info("Existing media found for " + name)
         return paths 
@@ -51,6 +56,7 @@ def findMatchingMedia(name, folder):
     for dirpath, dnames, fnames in os.walk(folder):
         for f in fnames:
             if (name) in f and not f.endswith('.json'):
+                logging.debug("Find Matching Media found: " + dirpath + f)
                 paths.append(copyMedia(os.path.join(dirpath, f), f))
     return paths
 
@@ -65,6 +71,7 @@ def buildGallery(paths):
 
 #Extract/convert markdown from saved selfpost
 def parseSelfPost(filePath):
+    logging.debug("Parsing selfpost for " + filePath)
     txt = '<div>'
     with open(filePath, 'r') as file:
         content = file.read()
@@ -76,6 +83,7 @@ def parseSelfPost(filePath):
 #Handle the html formatting for images, videos, and text files
 #Input: list of paths to media
 def formatMatchingMedia(paths):
+    logging.debug("Formatting media for " + str(paths))
     if paths is None:
         return ""
     if len(paths) == 1:
@@ -102,7 +110,7 @@ def copyMedia(mediaPath, filename):
         except:
             logging.error('FFMPEG failed')
     else:
-        shutil.copyfile(mediaPath, writeFolder + filename)
+        shutil.copyfile(mediaPath, os.path.join(writeFolder, filename))
     logging.debug('Moved ' + mediaPath + ' to ' + writeFolder +filename)
     return 'media/' + filename
 
@@ -348,8 +356,8 @@ def main():
 @click.option('--archive_context', default=False, help='Should we attempt to archive the contextual post for saved comments?')
 @click.option('--watch_folder', default=False, help='After the first run, watch the input folder for changes and rerun when detected')
 @click.option('--watch_freq', default=1, help='How often should we recheck the watched input folder in minutes. Requires watch_folder be enabled')
-
-def converter(input, output, recover_comments, archive_context, watch_folder, watch_freq):
+@click.option('--delete_input', default=False, help='Should we delete the input after creating the output?')
+def converter(input, output, recover_comments, archive_context, watch_folder, watch_freq, delete_input):
     global inputFolder
     global outputFolder
     global recoverComments
@@ -358,8 +366,12 @@ def converter(input, output, recover_comments, archive_context, watch_folder, wa
     #Set globals (there is probably a better way to do this)
     inputFolder = os.path.join(input, '')
     outputFolder = os.path.join(output, '')
-    recoverComments = recover_comments
-    context = archive_context
+    recoverComments = (recover_comments.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'])
+    context = (archive_context.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'])
+    delete_input = (delete_input.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'])
+
+    logging.debug("Recover Comments: " + str(recoverComments))
+    logging.debug("Recover Context: " + str(context))
 
     #Simple watch function
     if watch_folder:
@@ -381,6 +393,11 @@ def converter(input, output, recover_comments, archive_context, watch_folder, wa
             oldContent = content
     else:
         main()
+    
+    if delete_input:
+        for root, dirs, files in os.walk(inputFolder):
+            for file in files:
+                os.remove(os.path.join(root, file))
 
 
 if __name__ == '__main__':
