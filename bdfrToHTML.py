@@ -37,6 +37,17 @@ def loadJson(file_path):
 #Inputs: id name, folder to search
 def findMatchingMedia(name, folder):
     paths = []
+
+    #Don't copy if we already have it
+    existingMedia = os.path.join(outputFolder, media)
+    for dirpath, dnames, fnames in os.walk(existingMedia):
+        for f in fnames:
+            if (name) in f and not f.endswith('.json'):
+                paths.append(os.path.join(dirpath, f))
+    if len(paths) > 0:
+        logging.info("Existing media found for " + name)
+        return paths 
+
     for dirpath, dnames, fnames in os.walk(folder):
         for f in fnames:
             if (name) in f and not f.endswith('.json'):
@@ -286,28 +297,24 @@ def main():
         for f in fnames:
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
-                #Only do this if we haven't already
-                if (data['id'] + "\n") not in datalist:
-                    data['htmlPath'] = writeToHTML(data)
-                    if postCount == 25:
-                        file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
-                        with open(file_path, 'w') as file:
-                            html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
-                            <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
-                            </body>
-                    </html>""".format(previous=pageCount-1, next=pageCount+1)
-                            file.write(html)
-                        html = writeHead()
-                        pageCount = pageCount + 1
-                        postCount = 0
-                    if data.get('parent_id', None) is None:
-                        html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
-                    else:
-                        html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
-                    postCount = postCount + 1
-                    datalist.append(data['id'] + "\n")
+                data['htmlPath'] = writeToHTML(data)
+                if postCount == 25:
+                    file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
+                    with open(file_path, 'w') as file:
+                        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                        <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                        </body>
+                </html>""".format(previous=pageCount-1, next=pageCount+1)
+                        file.write(html)
+                    html = writeHead()
+                    pageCount = pageCount + 1
+                    postCount = 0
+                if data.get('parent_id', None) is None:
+                    html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
                 else:
-                    logging.info(data['id'] + " has already been processed, skipping.")
+                    html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
+                postCount = postCount + 1
+                datalist.append(data['id'] + "\n")
 
     file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
     with open(file_path, 'w') as file:
