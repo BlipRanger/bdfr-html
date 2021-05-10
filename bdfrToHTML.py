@@ -130,12 +130,11 @@ def archiveContext(link):
     data={}
     try:
         subprocess.call(["python3.9", "-m", "bdfr", "archive", "-l", link, path])
-        subprocess.call(["python3.9", "-m", "bdfr", "download", "-l", link, "--file-scheme", "{{POSTID}}", path])
+        subprocess.call(["python3.9", "-m", "bdfr", "download", "-l", link, "--file-scheme", "{POSTID}", path])
     except:
         logging.error("Failed to archive context")
     for dirpath, dnames, fnames in os.walk(inputFolder + "context"):
             for f in fnames:
-                print(f)
                 if f.endswith(".json"):
                     data = loadJson(os.path.join(dirpath, f))
                     data['htmlPath'] = writeToHTML(data)
