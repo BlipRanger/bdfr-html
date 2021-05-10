@@ -92,7 +92,7 @@ def formatMatchingMedia(paths):
         if path.endswith('jpg') or path.endswith('jpeg') or path.endswith('png') or path.endswith('gif'):
             return '<a href={path}><img src={path}></a>'.format(path=path)
         elif path.endswith('m4a') or path.endswith('mp4') or path.endswith('mkv'):
-            return '<video max-height="500" controls><source src="{path}"></video>'.format(path=path)
+            return '<video max-height="500" controls preload="metadata"><source src="{path}"></video>'.format(path=path)
         elif path.endswith('txt'):
             return parseSelfPost(os.path.join(outputFolder, path))
     elif(len(paths) > 1):
@@ -352,11 +352,11 @@ def main():
 @click.command()
 @click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
-@click.option('--recover_comments', default=False, help='Should we attempt to recover deleted comments?')
-@click.option('--archive_context', default=False, help='Should we attempt to archive the contextual post for saved comments?')
-@click.option('--watch_folder', default=False, help='After the first run, watch the input folder for changes and rerun when detected')
+@click.option('--recover_comments', default=False, type=bool, help='Should we attempt to recover deleted comments?')
+@click.option('--archive_context', default=False, type=bool, help='Should we attempt to archive the contextual post for saved comments?')
+@click.option('--watch_folder', default=False, type=bool, help='After the first run, watch the input folder for changes and rerun when detected')
 @click.option('--watch_freq', default=1, help='How often should we recheck the watched input folder in minutes. Requires watch_folder be enabled')
-@click.option('--delete_input', default=False, help='Should we delete the input after creating the output?')
+@click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
 def converter(input, output, recover_comments, archive_context, watch_folder, watch_freq, delete_input):
     global inputFolder
     global outputFolder
@@ -366,9 +366,9 @@ def converter(input, output, recover_comments, archive_context, watch_folder, wa
     #Set globals (there is probably a better way to do this)
     inputFolder = os.path.join(input, '')
     outputFolder = os.path.join(output, '')
-    recoverComments = (recover_comments.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'])
-    context = (archive_context.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'])
-    delete_input = (delete_input.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'])
+    recoverComments = (recover_comments)
+    context = (archive_context)
+    delete_input = (delete_input)
 
     logging.debug("Recover Comments: " + str(recoverComments))
     logging.debug("Recover Context: " + str(context))
