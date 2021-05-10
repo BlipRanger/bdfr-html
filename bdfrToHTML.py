@@ -273,8 +273,9 @@ def main():
     datalist = []
 
     file_path = os.path.join(outputFolder, 'idList.txt')
-    with file_path as f:
-        datalist = list(f)
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            datalist = list(f)
     
     assure_path_exists(outputFolder)
     if not os.path.isdir(inputFolder):
@@ -305,7 +306,7 @@ def main():
                     else:
                         html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
                     postCount = postCount + 1
-                    datalist.append(data[id])
+                    datalist.append(data['id'] + "\n")
 
     file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
     with open(file_path, 'w') as file:

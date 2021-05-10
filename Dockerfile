@@ -1,32 +1,27 @@
 FROM python:3.9
-LABEL Description=""
 
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
+RUN apt-get update
+RUN apt-get install ffmpeg -y
 
-RUN apt-get update \
- && apt-get install -y ffmpeg \
- && apt-get install -y git
+COPY ./requirements.txt requirements.txt
+COPY ./bdfrToHTML.py bdfrToHTML.py
+COPY ./style.css style.css
+COPY ./start.py start.py
 
-COPY requirements.txt /requirements.txt
-RUN pip install --no-cache-dir -r /requirements.txt \
- && rm -rf /requirements.txt
+ENV BDFR_FREQ=15
+ENV BDFR_IN=/input
+ENV BDFR_OUT=/output
+ENV BDFR_RECOVER_COMMENTS=True
+ENV BDFR_ARCHIVE_CONTEXT=True
+ENV BDFR_LIMIT=1100
 
-RUN mkdir temp
+EXPOSE 5000
+EXPOSE 7634
 
-RUN git clone 'https://github.com/aliparlakci/bulk-downloader-for-reddit.git' temp
-WORKDIR temp
-RUN git checkout v2 \
- && pip install .
+RUN pip install -r requirements.txt
 
-COPY . /bdfr-html
-WORKDIR /bdfr-html
+RUN mkdir input
+RUN mkdir output
+RUN mkdir config
 
-
-RUN mkdir input && mkdir html
-
-ENTRYPOINT ["python", "bdfrToHTML.py"]
-
-
-
-
+CMD python start.py

@@ -1,0 +1,22 @@
+version: '3'
+services:
+  bdfr-html:
+    container_name: bdfr-html
+    build: .
+    environment:
+      - BDFR_LIMIT=5
+      - BDFR_RECOVER_COMMENTS=False
+      - BDFR_FREQ=2
+    volumes:
+      - output:/output
+      - ./config:/root/.config/bdfr/
+  apache:
+    image: httpd:alpine
+    container_name: bdfr-server
+    ports:
+      - "80:80"
+    volumes:
+      - output:/usr/local/apache2/htdocs/
+
+volumes:
+  output:
