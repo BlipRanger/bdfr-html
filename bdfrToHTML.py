@@ -306,6 +306,8 @@ def main():
                         html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
                     postCount = postCount + 1
                     datalist.append(data['id'] + "\n")
+                else:
+                    logging.info(data['id'] + " has already been processed, skipping.")
 
     file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
     with open(file_path, 'w') as file:
