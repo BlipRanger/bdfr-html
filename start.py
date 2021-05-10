@@ -21,7 +21,7 @@ idList = os.path.join(outFolder, "idList.txt")
 
 while True:
     if runBdfr:
-        subprocess.call(["python3.9", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", limit, "--config", "/config/config.cfg", "--authenticate", inFolder])
-        subprocess.call(["python3.9", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", limit, "--config", "/config/config.cfg", "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{{POSTID}}", inFolder])
+        subprocess.call(["python3.9", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", limit, "--authenticate", inFolder])
+        subprocess.call(["python3.9", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", limit, "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{{POSTID}}", inFolder])
     subprocess.call(["python3.9", "bdfrToHTML.py", "--input", inFolder, "--output", outFolder, "--recover_comments", recover_comments, "--archive_context", archive_context])
     time.sleep(int(freq)*60)
