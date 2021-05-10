@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 __author__ = "BlipRanger"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __license__ = "MIT"
 
 import json
@@ -13,6 +13,7 @@ import shutil
 import requests
 import logging
 import subprocess
+import time
 
 #Logging Setup
 logging.basicConfig(level=logging.INFO)
@@ -30,7 +31,6 @@ def loadJson(file_path):
     data = json.load(f)
     f.close()
     logging.debug('Loaded ' + file_path)
-    data['htmlPath'] = writeToHTML(data)
     return data
 
 #Search the input folder for media files containing the id value from an archive
@@ -129,8 +129,6 @@ def archiveContext(link):
     assure_path_exists(path)
     data={}
     try:
-        #logging.debug("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
-        #logging.debug("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
         subprocess.call(["python3.9", "-m", "bdfr", "archive", "-l", link, path])
         subprocess.call(["python3.9", "-m", "bdfr", "download", "-l", link, "--file-scheme", "{{POSTID}}", path])
     except:
@@ -140,6 +138,7 @@ def archiveContext(link):
                 print(f)
                 if f.endswith(".json"):
                     data = loadJson(os.path.join(dirpath, f))
+                    data['htmlPath'] = writeToHTML(data)
     shutil.rmtree(inputFolder + "context/")
     return data['htmlPath']
 
@@ -268,12 +267,80 @@ def assure_path_exists(path):
 #Main function, loops through json files in input folder, extracts archive data into dict, 
 #formats/writes archive data and media to html files, creates a single index.html file with 
 #links to all archived posts. 
+def main():
+    
+    #Begin main process
+    datalist = []
+
+    file_path = os.path.join(outputFolder, 'idList.txt')
+    with file_path as f:
+        datalist = list(f)
+    
+    assure_path_exists(outputFolder)
+    if not os.path.isdir(inputFolder):
+        raise ValueError('Input folder does not exist') 
+    html = writeHead()
+    postCount = 0
+    pageCount = 1
+    for dirpath, dnames, fnames in os.walk(inputFolder):
+        for f in fnames:
+            if f.endswith(".json"):
+                data = loadJson(os.path.join(dirpath, f))
+                #Only do this if we haven't already
+                if data['id'] not in datalist:
+                    data['htmlPath'] = writeToHTML(data)
+                    if postCount == 25:
+                        file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
+                        with open(file_path, 'w') as file:
+                            html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                            <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                            </body>
+                    </html>""".format(previous=pageCount-1, next=pageCount+1)
+                            file.write(html)
+                        html = writeHead()
+                        pageCount = pageCount + 1
+                        postCount = 0
+                    if data.get('parent_id', None) is None:
+                        html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
+                    else:
+                        html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
+                    postCount = postCount + 1
+                    datalist.append(data[id])
+
+    file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
+    with open(file_path, 'w') as file:
+        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
+                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                         </body>
+                </html>""".format(previous=pageCount-1, next=pageCount+1)
+        file.write(html)
+    html = writeHead()
+
+
+    file_path = os.path.join(outputFolder, 'index.html')
+    with open(file_path, 'w') as file:
+        html = html + """
+        <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
+                </html>"""    
+        file.write(html)
+
+    file_path = os.path.join(outputFolder, 'idList.txt')
+    with open(file_path, 'w') as file:
+        file.writelines(datalist)
+
+    shutil.copyfile('style.css', os.path.join(outputFolder, 'style.css'))
+    logging.info("Run Complete!")
+
+
 @click.command()
 @click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
 @click.option('--recover_comments', default=False, help='Should we attempt to recover deleted comments?')
 @click.option('--archive_context', default=False, help='Should we attempt to archive the contextual post for saved comments?')
-def converter(input, output, recover_comments, archive_context):
+@click.option('--watch_folder', default=False, help='After the first run, watch the input folder for changes and rerun when detected')
+@click.option('--watch_freq', default=1, help='How often should we recheck the watched input folder in minutes. Requires watch_folder be enabled')
+
+def converter(input, output, recover_comments, archive_context, watch_folder, watch_freq):
     global inputFolder
     global outputFolder
     global recoverComments
@@ -285,51 +352,27 @@ def converter(input, output, recover_comments, archive_context):
     recoverComments = recover_comments
     context = archive_context
 
-    #Begin main process
-    assure_path_exists(output)
-    if not os.path.isdir(inputFolder):
-        raise ValueError('Input folder does not exist') 
-    html = writeHead()
-    postCount = 0
-    pageCount = 1
-    for dirpath, dnames, fnames in os.walk(input):
-        for f in fnames:
-            if f.endswith(".json"):
-                data = loadJson(os.path.join(dirpath, f))
-                if postCount == 25:
-                    file_path = os.path.join(output, 'page{pageCount}.html'.format(pageCount=pageCount))
-                    with open(file_path, 'w') as file:
-                        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
-                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
-                         </body>
-                </html>""".format(previous=pageCount-1, next=pageCount+1)
-                        file.write(html)
-                    html = writeHead()
-                    pageCount = pageCount + 1
-                    postCount = 0
-                if data.get('parent_id', None) is None:
-                    html = html + '<a href={local_path}>{post}</a>'.format(post=writePost(data), local_path=data['htmlPath'])
-                else:
-                    html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
-                postCount = postCount + 1
+    #Simple watch function
+    if watch_folder:
+        oldContent = []
+        logging.info("Watching...")
+        while True:
+            content = []
+            for dirpath, dnames, fnames in os.walk(inputFolder):
+                for f in fnames:
+                    content.append(f)
+                for d in dnames:
+                    content.append(d)
+            if content != oldContent:
+                logging.info("Content found!")
+                main()
+            else:
+                logging.info("Nothing new, sleeping for " + str(watch_freq) + " minutes.")
+                time.sleep(watch_freq * 60)
+            oldContent = content
+    else:
+        main()
 
-    file_path = os.path.join(output, 'page{pageCount}.html'.format(pageCount=pageCount))
-    with open(file_path, 'w') as file:
-        html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
-                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
-                         </body>
-                </html>""".format(previous=pageCount-1, next=pageCount+1)
-        file.write(html)
-    html = writeHead()
-
-
-    file_path = os.path.join(output, 'index.html')
-    with open(file_path, 'w') as file:
-        html = html + """
-        <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
-                </html>"""    
-        file.write(html)
-    shutil.copyfile('style.css', os.path.join(outputFolder, 'style.css'))
 
 if __name__ == '__main__':
     converter()
