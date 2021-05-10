@@ -18,8 +18,6 @@ runBdfr = os.environ['RUN_BDFR']
 
 idList = os.path.join(outFolder, "idList.txt")
 
-#Start Webserver
-#subprocess.Popen(["twistd", "-n", "web", "--path", outFolder, "--port", "tcp:7634"])
 
 while True:
     if runBdfr:
