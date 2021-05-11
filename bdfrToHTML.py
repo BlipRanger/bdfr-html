@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 __author__ = "BlipRanger"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __license__ = "GNU GPLv3"
 
 import json
@@ -13,9 +13,14 @@ import shutil
 import requests
 import logging
 import subprocess
+import time
 
 #Logging Setup
-logging.basicConfig(level=logging.INFO)
+level = os.environ['BDFRH_LOGLEVEL']
+if level == "DEBUG":
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 
 #Globals
@@ -30,16 +35,28 @@ def loadJson(file_path):
     data = json.load(f)
     f.close()
     logging.debug('Loaded ' + file_path)
-    data['htmlPath'] = writeToHTML(data)
     return data
 
 #Search the input folder for media files containing the id value from an archive
 #Inputs: id name, folder to search
 def findMatchingMedia(name, folder):
     paths = []
+
+    #Don't copy if we already have it
+    existingMedia = os.path.join(outputFolder, "media/")
+    for dirpath, dnames, fnames in os.walk(existingMedia):
+        for f in fnames:
+            if (name) in f and not f.endswith('.json'):
+                logging.debug("Find Matching Media found: " + dirpath + f)
+                paths.append(os.path.join('media/', f))
+    if len(paths) > 0:
+        logging.info("Existing media found for " + name)
+        return paths 
+
     for dirpath, dnames, fnames in os.walk(folder):
         for f in fnames:
             if (name) in f and not f.endswith('.json'):
+                logging.debug("Find Matching Media found: " + dirpath + f)
                 paths.append(copyMedia(os.path.join(dirpath, f), f))
     return paths
 
@@ -54,6 +71,7 @@ def buildGallery(paths):
 
 #Extract/convert markdown from saved selfpost
 def parseSelfPost(filePath):
+    logging.debug("Parsing selfpost for " + filePath)
     txt = '<div>'
     with open(filePath, 'r') as file:
         content = file.read()
@@ -65,6 +83,7 @@ def parseSelfPost(filePath):
 #Handle the html formatting for images, videos, and text files
 #Input: list of paths to media
 def formatMatchingMedia(paths):
+    logging.debug("Formatting media for " + str(paths))
     if paths is None:
         return ""
     if len(paths) == 1:
@@ -73,16 +92,16 @@ def formatMatchingMedia(paths):
         if path.endswith('jpg') or path.endswith('jpeg') or path.endswith('png') or path.endswith('gif'):
             return '<a href={path}><img src={path}></a>'.format(path=path)
         elif path.endswith('m4a') or path.endswith('mp4') or path.endswith('mkv'):
-            return '<video max-height="500" controls><source src="{path}"></video>'.format(path=path)
+            return '<video max-height="500" controls preload="metadata"><source src="{path}"></video>'.format(path=path)
         elif path.endswith('txt'):
-            return parseSelfPost(outputFolder + path)
+            return parseSelfPost(os.path.join(outputFolder, path))
     elif(len(paths) > 1):
         return buildGallery(paths)
     return ""
 
 #Copy media from the input folder to the file structure of the html pages
 def copyMedia(mediaPath, filename):
-    writeFolder = outputFolder + 'media/' 
+    writeFolder = os.path.join(outputFolder, 'media/')
     assure_path_exists(writeFolder)
     if filename.endswith('mp4'):
         try:
@@ -91,7 +110,7 @@ def copyMedia(mediaPath, filename):
         except:
             logging.error('FFMPEG failed')
     else:
-        shutil.copyfile(mediaPath, writeFolder + filename)
+        shutil.copyfile(mediaPath, os.path.join(writeFolder, filename))
     logging.debug('Moved ' + mediaPath + ' to ' + writeFolder +filename)
     return 'media/' + filename
 
@@ -125,20 +144,19 @@ def recoverDeletedComment(comment):
 
 #Requires bdfr V2
 def archiveContext(link):
-    assure_path_exists(inputFolder + "context/")
+    path = os.path.join(inputFolder, "context/")
+    assure_path_exists(path)
     data={}
     try:
-        logging.debug("python3.9 -m bulkredditdownloader archive -l '{link}' {folder}".format(link=link, folder=inputFolder + "context"))
-        logging.debug("python3.9 -m bulkredditdownloader download -l '{link}' --file-scheme  \'{{POSTID}}\' {folder}".format(link=link, folder=inputFolder + "context"))
-        subprocess.call(["python3.9", "-m", "bulkredditdownloader", "archive", "-l", link, inputFolder + "context"])
-        subprocess.call(["python3.9", "-m", "bulkredditdownloader", "download", "-l", link, "--file-scheme", "{{POSTID}}", inputFolder + "context"])
+        subprocess.call(["python3.9", "-m", "bdfr", "archive", "-l", link, path])
+        subprocess.call(["python3.9", "-m", "bdfr", "download", "-l", link, "--file-scheme", "{POSTID}", path])
     except:
         logging.error("Failed to archive context")
     for dirpath, dnames, fnames in os.walk(inputFolder + "context"):
             for f in fnames:
-                print(f)
                 if f.endswith(".json"):
                     data = loadJson(os.path.join(dirpath, f))
+                    data['htmlPath'] = writeToHTML(data)
     shutil.rmtree(inputFolder + "context/")
     return data['htmlPath']
 
@@ -238,7 +256,8 @@ def getSubreddit(permalink):
 #Write html file from given post archive info
 def writeToHTML(data):
     file_path = data['id'] + '.html'
-    with open(outputFolder + file_path, 'w') as file:
+    path = os.path.join(outputFolder, file_path)
+    with open(path, 'w') as file:
         html = writeHead()
         if data.get('parent_id', None) is None:
             html = html + writePost(data) + "<h2>Comments</h2><div class=comments>"
@@ -266,38 +285,33 @@ def assure_path_exists(path):
 #Main function, loops through json files in input folder, extracts archive data into dict, 
 #formats/writes archive data and media to html files, creates a single index.html file with 
 #links to all archived posts. 
-@click.command()
-@click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
-@click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
-@click.option('--recover_comments', default=False, help='Should we attempt to recover deleted comments?')
-@click.option('--archive_context', default=False, help='Should we attempt to archive the contextual post for saved comments?')
-def converter(input, output, recover_comments, archive_context):
-    global inputFolder
-    global outputFolder
-    global recoverComments
-    global context
-
-    #Set globals (there is probably a better way to do this)
-    inputFolder = input
-    outputFolder = output
-    recoverComments = recover_comments
-    context = archive_context
-
+def main():
+    
     #Begin main process
-    assure_path_exists(output)
+    datalist = []
+
+    file_path = os.path.join(outputFolder, 'idList.txt')
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            datalist = list(f)
+    
+    assure_path_exists(outputFolder)
+    if not os.path.isdir(inputFolder):
+        raise ValueError('Input folder does not exist') 
     html = writeHead()
     postCount = 0
     pageCount = 1
-    for dirpath, dnames, fnames in os.walk(input):
+    for dirpath, dnames, fnames in os.walk(inputFolder):
         for f in fnames:
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
+                data['htmlPath'] = writeToHTML(data)
                 if postCount == 25:
-                    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+                    file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
                     with open(file_path, 'w') as file:
                         html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
-                         <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
-                         </body>
+                        <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
+                        </body>
                 </html>""".format(previous=pageCount-1, next=pageCount+1)
                         file.write(html)
                     html = writeHead()
@@ -308,8 +322,9 @@ def converter(input, output, recover_comments, archive_context):
                 else:
                     html = html + '<a href={local_path}>{post}</a>'.format(post=writeCommentPost(data), local_path=data['htmlPath'])
                 postCount = postCount + 1
+                datalist.append(data['id'] + "\n")
 
-    file_path = output + '/page{pageCount}.html'.format(pageCount=pageCount)
+    file_path = os.path.join(outputFolder, 'page{pageCount}.html'.format(pageCount=pageCount))
     with open(file_path, 'w') as file:
         html = html + """<div class=footer><div class=previousPage><a href='page{previous}.html'>Previous Page</a></div>
                          <div class=nextPage><a href='page{next}.html'>Next Page</a></div></div>
@@ -319,13 +334,71 @@ def converter(input, output, recover_comments, archive_context):
     html = writeHead()
 
 
-    file_path = output + '/index.html'
+    file_path = os.path.join(outputFolder, 'index.html')
     with open(file_path, 'w') as file:
         html = html + """
         <meta http-equiv="refresh" content="0; URL='page1.html'" /></div></body>
                 </html>"""    
         file.write(html)
-    shutil.copyfile('style.css', outputFolder + 'style.css')
+
+    file_path = os.path.join(outputFolder, 'idList.txt')
+    with open(file_path, 'w') as file:
+        file.writelines(datalist)
+
+    shutil.copyfile('style.css', os.path.join(outputFolder, 'style.css'))
+    logging.info("Run Complete!")
+
+
+@click.command()
+@click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
+@click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
+@click.option('--recover_comments', default=False, type=bool, help='Should we attempt to recover deleted comments?')
+@click.option('--archive_context', default=False, type=bool, help='Should we attempt to archive the contextual post for saved comments?')
+@click.option('--watch_folder', default=False, type=bool, help='After the first run, watch the input folder for changes and rerun when detected')
+@click.option('--watch_freq', default=1, help='How often should we recheck the watched input folder in minutes. Requires watch_folder be enabled')
+@click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
+def converter(input, output, recover_comments, archive_context, watch_folder, watch_freq, delete_input):
+    global inputFolder
+    global outputFolder
+    global recoverComments
+    global context
+
+    #Set globals (there is probably a better way to do this)
+    inputFolder = os.path.join(input, '')
+    outputFolder = os.path.join(output, '')
+    recoverComments = (recover_comments)
+    context = (archive_context)
+    delete_input = (delete_input)
+
+    logging.debug("Recover Comments: " + str(recoverComments))
+    logging.debug("Recover Context: " + str(context))
+
+    #Simple watch function
+    if watch_folder:
+        oldContent = []
+        logging.info("Watching...")
+        while True:
+            content = []
+            for dirpath, dnames, fnames in os.walk(inputFolder):
+                for f in fnames:
+                    content.append(f)
+                for d in dnames:
+                    content.append(d)
+            if content != oldContent:
+                logging.info("Content found!")
+                main()
+            else:
+                logging.info("Nothing new, sleeping for " + str(watch_freq) + " minutes.")
+                time.sleep(watch_freq * 60)
+            oldContent = content
+    else:
+        main()
+    
+    if delete_input:
+        for root, dirs, files in os.walk(inputFolder):
+            for file in files:
+                os.remove(os.path.join(root, file))
+
 
 if __name__ == '__main__':
     converter()
