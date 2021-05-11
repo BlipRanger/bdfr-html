@@ -2,7 +2,7 @@
 
 __author__ = "BlipRanger"
 __version__ = "0.1.1"
-__license__ = "MIT"
+__license__ = "GNU GPLv3"
 
 import json
 import os
