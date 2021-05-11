@@ -11,6 +11,8 @@ services:
       - BDFR_IN=/input                      #Where should bdfr place files pulled from reddit
       - BDFR_ARCHIVE_CONTEXT=True           #Should bdfr-html also get post associated with saved comments
       - RUN_BDFR=True                       #Run bdfr each time before running bdfr-html
+      - BDFRH_DELETE=False                  #Delete input media files after copying them to the media folder
+      - BDFRH_LOGLEVEL=INFO                 #Either INFO or DEBUG for more verbose logs
     volumes:
       - output:/output                      #Shared docker volume between the script container and the webserver, could also be mounted
       - ./config:/root/.config/bdfr/        #Mounted folder where the bdfr config file lives
