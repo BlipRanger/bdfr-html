@@ -1,0 +1,14 @@
+{% block post %}
+<div class=post>
+    <h1>{{ title }}</h1>
+    <div class="info">
+        <div class="links">
+            <a href="{{ local_link }}"> link</a> <a href="{{ url }}">Content link</a> <a href="https://www.reddit.com{{ premalink }}"> Reddit Link</a> 
+        </div>
+        <time>{{ created_utc }}</time><a href='https://reddit.com/{{ subreddit }}'><span class="subreddit">{{ subreddit }}</span></a><a href='https://reddit.com/u/{{ author }}'><span class="user">u/{{ author }}</span></a>
+    </div>
+    {%- if content%}
+    <div class=content>{{ content | markdown}}</div>
+    {%- endif %}
+</div>
+{% endblock %}
