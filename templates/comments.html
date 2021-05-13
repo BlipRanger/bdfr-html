@@ -1,6 +1,6 @@
 {% block comments %}
 <h2>Comments</h2>
-{% for comment in comments-%}
+{% for comment in post.comments-%}
     <div class=comments>
         <div id={{ comment.id }} class="comment">
             <div class="info {{ comment.recovered }}">

@@ -1,1 +1,4 @@
 .vscode/settings.json
+html/
+temp/
+__pycache__/
