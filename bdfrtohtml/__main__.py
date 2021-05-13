@@ -5,12 +5,9 @@ __version__ = "1.3.0"
 __license__ = "GNU GPLv3"
 
 import os
-import markdown
-from datetime import datetime
 import click
 import shutil
 import logging
-
 from bdfrtohtml import filehelper
 from bdfrtohtml import posthelper
 import logging
