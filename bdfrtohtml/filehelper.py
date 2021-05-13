@@ -30,7 +30,7 @@ def writeIndexFile(postList, outputFolder):
         file.write(template.render(posts=postList))
 
 #Check for path, create if does not exist
-def assure_path_exists(path):
+def assurePathExists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)

@@ -23,19 +23,25 @@ logger = logging.getLogger(__name__)
 @click.option('--recover_comments', default=False, type=bool, help='Should we attempt to recover deleted comments?')
 @click.option('--archive_context', default=False, type=bool, help='Should we attempt to archive the contextual post for saved comments?')
 @click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
-def converter(input, output, recover_comments, archive_context, delete_input):
+def main(input, output, recover_comments, archive_context, delete_input):
 
-    filehelper.assure_path_exists(output)
-    filehelper.assure_path_exists(os.path.join(output, "media/"))
-    filehelper.assure_path_exists(input)
+    filehelper.assurePathExists(output)
+    filehelper.assurePathExists(os.path.join(output, "media/"))
+    filehelper.assurePathExists(input)
 
     #Load all of the json files
     allPosts = filehelper.importPosts(input)
 
     #Find the media for the files and append that to the entry
     for post in allPosts:
-        filehelper.findMatchingMedia(post, input, output)
+        
         posthelper.handleComments(post, archive_context)
+        if recover_comments: 
+            post = posthelper.recoverDeletedComments(post)
+        if archive_context: 
+            post = posthelper.getCommentContext(post, input)
+
+        filehelper.findMatchingMedia(post, input, output)
         filehelper.writePostToFile(post, output)
 
     filehelper.writeIndexFile(allPosts, output)
@@ -44,4 +50,4 @@ def converter(input, output, recover_comments, archive_context, delete_input):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    converter()
+    main()
