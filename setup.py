@@ -1,7 +1,7 @@
 from setuptools import setup
 setup(
   name = 'bdfrtohtml',
-  packages = ['bdfrtohtml'], # this must be the same as the name above
+  packages = ['bdfrtohtml'],
   version = '1.3.0',
   description = 'Convert the output of BDFR to HTML',
   author = 'BlipRanger',
