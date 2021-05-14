@@ -8,6 +8,7 @@ WORKDIR /bdfrh
 COPY ./bdfrtohtml/ ./bdfrtohtml
 COPY ./templates/ ./templates
 COPY ./start.py ./start.py
+COPY ./requirements.txt ./requirements.txt
 
 ENV BDFR_FREQ=15
 ENV BDFR_IN=/input
