@@ -108,3 +108,13 @@ def writeListFile(posts, outputFolder):
     with open(filepath, 'w', encoding="utf-8") as file:
         for post in posts:
             file.write(post['id'] + '\n')
+
+#Delete the contents of the input folder
+def emptyInputFolder(inputFolder):
+    for root, dirs, files in os.walk(inputFolder):
+        for file in files:
+            os.remove(os.path.join(root, file))
+            logger.info("removing: " + os.path.join(root, file))
+        for dir in dirs:
+            shutil.rmtree(os.path.join(root, dir))
+            logger.info("removing: " + os.path.join(root, dir))

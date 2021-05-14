@@ -46,8 +46,10 @@ def main(input, output, recover_comments, archive_context, delete_input):
 
     filehelper.writeIndexFile(allPosts, output)
     filehelper.writeListFile(allPosts, output)
-
     shutil.copyfile('style.css', os.path.join(output, 'style.css'))
+
+    if delete_input:
+        filehelper.emptyInputFolder(input)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
