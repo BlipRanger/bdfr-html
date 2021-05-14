@@ -41,7 +41,7 @@ def getCommentContext(post, inputFolder):
     id = post.get("savedcomment")
 
     contextFolder = os.path.join(inputFolder,"context/")
-    filehelper.assure_path_exists(contextFolder)
+    filehelper.assurePathExists(contextFolder)
 
     if id is not None:
         try:
@@ -57,9 +57,15 @@ def getCommentContext(post, inputFolder):
                     print("Loaded")
                     post = filehelper.loadJson(os.path.join(dirpath, f))
 
-        
-        saved = next((c for c in post["comments"] if c['id'] == id))
-        saved["is_saved"] = True  
+        for comment in post["comments"]:
+            if comment["id"] == id:
+                comment["is_saved"] = True
+                break
+            for reply in comment["replies"]:
+                if reply["id"] == id:
+                    reply["is_saved"] = True
+                    break
+
     return post
 
 

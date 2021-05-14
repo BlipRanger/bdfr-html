@@ -3,8 +3,8 @@
 {% for comment in post.comments-%}
     <div class="comments">      
         <div id={{ comment.id }} class="comment">
-            <div class="info {% if comment.recovered %}recovered{% endif %}">
-                <a href="https://www.reddit.com{{ comment.commentLink }}"><div class="time">{{ comment.created_utc }}</div></a>
+            <div class="info {% if comment.recovered %}recovered{% endif %} {% if comment.is_saved %}saved{% endif %}">
+                <a href="https://www.reddit.com{{ comment.commentLink }}"><div class="time">{{ comment.created_utc | float_to_datetime }}</div></a>
                 <div class="score">({{ comment.score }})</div>
                 <div class=author>u/{{ comment.author }}</div>
             </div>
@@ -12,8 +12,8 @@
             {%- for reply in comment.replies recursive %}
                 <div class="reply">
                         <div id={{ reply.id }} class="comment">
-                            <div class="info {% if reply.recovered %}recovered{% endif %}">
-                                <a href="https://www.reddit.com{{ reply.commentLink }}"><div class="time">{{ reply.created_utc }}</div></a>
+                            <div class="info {% if reply.recovered %}recovered{% endif %} {% if reply.is_saved %}saved{% endif %}">
+                                <a href="https://www.reddit.com{{ reply.commentLink }}"><div class="time">{{ reply.created_utc | float_to_datetime }}</div></a>
                                 <div class="score">({{ reply.score }})</div>
                                 <div class=author>u/{{ reply.author }}</div>
                             </div>

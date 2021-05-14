@@ -5,12 +5,15 @@ import jinja2
 import json
 import os
 import logging
+from bdfrtohtml import util
 logger = logging.getLogger(__name__)
+
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./templates")
 templateEnv = jinja2.Environment(loader=templateLoader)
 templateEnv.add_extension('jinja2.ext.debug')
 templateEnv.filters["markdown"] = markdown.markdown
+templateEnv.filters["float_to_datetime"] = util.float_to_datetime
 
 #Import all json files into single list. 
 def importPosts(folder):
@@ -49,10 +52,8 @@ def copyMedia(sourcePath, outputPath):
     if outputPath.endswith('mp4'):
         try:
             #This fixes mp4 files that won't play in browsers
-            command = 'ffmpeg -i "{input}" -c:v copy -c:a copy -y "{output}"'.format(input=sourcePath, output=outputPath)
-            print(command)
-            print(subprocess.check_output(command))
-            os.system("ffmpeg -nostats -loglevel 0 -i '{input}' -c:v copy -c:a copy -y '{output}'".format(input=sourcePath, output=outputPath))
+            command = 'ffmpeg -nostats -loglevel 0 -i "{input}" -c:v copy -c:a copy -y "{output}"'.format(input=sourcePath, output=outputPath)
+            subprocess.check_output(command)
         except:
             logging.error('FFMPEG failed')
     else:
