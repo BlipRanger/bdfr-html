@@ -37,6 +37,7 @@ def recoverDeletedComments(post):
 
 
 #Requires bdfr V2
+#Use BDFR to download both the archive and media for a given post
 def getCommentContext(post, inputFolder):
     id = post.get("savedcomment")
 

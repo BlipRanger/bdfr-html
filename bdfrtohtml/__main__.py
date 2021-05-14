@@ -15,16 +15,17 @@ logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option('--input', default='.', help='The folder where the download and archive results have been saved to')
+@click.option('--input', default='./', help='The folder where the download and archive results have been saved to')
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
 @click.option('--recover_comments', default=False, type=bool, help='Should we attempt to recover deleted comments?')
 @click.option('--archive_context', default=False, type=bool, help='Should we attempt to archive the contextual post for saved comments?')
 @click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
 def main(input, output, recover_comments, archive_context, delete_input):
 
-    filehelper.assurePathExists(output)
+    output = filehelper.assurePathExists(output)
+    input = filehelper.assurePathExists(input)
     filehelper.assurePathExists(os.path.join(output, "media/"))
-    filehelper.assurePathExists(input)
+
 
     #Load all of the json files
     allPosts = filehelper.importPosts(input)
@@ -42,9 +43,10 @@ def main(input, output, recover_comments, archive_context, delete_input):
         filehelper.writePostToFile(post, output)
 
     filehelper.writeIndexFile(allPosts, output)
+    filehelper.writeListFile(allPosts, output)
 
     shutil.copyfile('style.css', os.path.join(output, 'style.css'))
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     main()

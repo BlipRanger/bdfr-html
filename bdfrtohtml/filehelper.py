@@ -23,6 +23,7 @@ def importPosts(folder):
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
                 postList.append(data)
+                logging.debug('Imported  ' + os.path.join(dirpath, f))
     return postList
 
 #Write index page
@@ -31,12 +32,15 @@ def writeIndexFile(postList, outputFolder):
      
     with open(os.path.join(outputFolder, "index.html"), 'w', encoding="utf-8") as file:
         file.write(template.render(posts=postList))
+    logging.debug('Wrote ' + os.path.join(outputFolder, "index.html"))
 
 #Check for path, create if does not exist
 def assurePathExists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
+        logging.debug("Created " + dir)
+    return dir
 
 #Loads in the json file data and adds the path of it to the dict
 def loadJson(file_path):
@@ -54,15 +58,14 @@ def copyMedia(sourcePath, outputPath):
             #This fixes mp4 files that won't play in browsers
             command = 'ffmpeg -nostats -loglevel 0 -i "{input}" -c:v copy -c:a copy -y "{output}"'.format(input=sourcePath, output=outputPath)
             subprocess.check_output(command)
-        except:
-            logging.error('FFMPEG failed')
+        except Exception as e:
+            logging.error('FFMPEG failed: ' + str(e))
     else:
         shutil.copyfile(sourcePath, outputPath)
     logging.debug('Moved ' + sourcePath + ' to ' + outputPath)
 
 
 #Search the input folder for media files containing the id value from an archive
-#Inputs: id name, folder to search
 def findMatchingMedia(post, inputFolder, outputFolder):
     paths = []
     mediaFolder = os.path.join(outputFolder, 'media/')
@@ -72,10 +75,10 @@ def findMatchingMedia(post, inputFolder, outputFolder):
     for dirpath, dnames, fnames in os.walk(existingMedia):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json') and not f.endswith('.html'):
-                logging.info("Find Matching Media found: " + dirpath + f)
+                logging.debug("Find Matching Media found: " + dirpath + f)
                 paths.append(os.path.join('media/', f))
     if len(paths) > 0:
-        logging.info("Existing media found for " + post['id'])
+        logging.debug("Existing media found for " + post['id'])
         post['paths'] = paths
         return
     for dirpath, dnames, fnames in os.walk(inputFolder):
@@ -87,6 +90,7 @@ def findMatchingMedia(post, inputFolder, outputFolder):
     post['paths'] = paths
     return 
 
+#Creates the html for a post using the jinja2 template and writes it to a file
 def writePostToFile(post, outputFolder):
 
     template = templateEnv.get_template("page.html")
@@ -95,3 +99,11 @@ def writePostToFile(post, outputFolder):
     
     with open(post['filepath'], 'w', encoding="utf-8") as file:
         file.write(template.render(post=post))
+    logging.debug('Wrote ' + post['filepath'])
+
+#Write a list of successful ids to a file
+def writeListFile(posts, outputFolder):
+    filepath = os.path.join(outputFolder, "idList.txt")
+    with open(filepath, 'w', encoding="utf-8") as file:
+        for post in posts:
+            file.write(post['id'] + '\n')
