@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def main(input, output, recover_comments, archive_context, delete_input):
 
     output = filehelper.assurePathExists(output)
-    input = filehelper.assurePathExists(input)
+    input = filehelper.assurePathExists(input) 
     filehelper.assurePathExists(os.path.join(output, "media/"))
 
 

@@ -37,6 +37,7 @@ def writeIndexFile(postList, outputFolder):
 
 #Check for path, create if does not exist
 def assurePathExists(path):
+    path = os.path.join(path, '')
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -114,7 +115,7 @@ def emptyInputFolder(inputFolder):
     for root, dirs, files in os.walk(inputFolder):
         for file in files:
             os.remove(os.path.join(root, file))
-            logger.info("removing: " + os.path.join(root, file))
+            logger.debug("Removed: " + os.path.join(root, file))
         for dir in dirs:
             shutil.rmtree(os.path.join(root, dir))
-            logger.info("removing: " + os.path.join(root, dir))
+            logger.debug("Removed: " + os.path.join(root, dir))
