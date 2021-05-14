@@ -22,8 +22,9 @@ def importPosts(folder):
         for f in fnames:
             if f.endswith(".json"):
                 data = loadJson(os.path.join(dirpath, f))
-                postList.append(data)
-                logging.debug('Imported  ' + os.path.join(dirpath, f))
+                if data.get("id") is not None:
+                    postList.append(data)
+                    logging.debug('Imported  ' + os.path.join(dirpath, f))
     return postList
 
 #Write index page

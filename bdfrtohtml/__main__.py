@@ -32,15 +32,17 @@ def main(input, output, recover_comments, archive_context, delete_input):
 
     #Find the media for the files and append that to the entry
     for post in allPosts:
-        
-        posthelper.handleComments(post, archive_context)
-        if recover_comments: 
-            post = posthelper.recoverDeletedComments(post)
-        if archive_context: 
-            post = posthelper.getCommentContext(post, input)
+        try:
+            posthelper.handleComments(post, archive_context)
+            if recover_comments: 
+                post = posthelper.recoverDeletedComments(post)
+            if archive_context: 
+                post = posthelper.getCommentContext(post, input)
 
-        filehelper.findMatchingMedia(post, input, output)
-        filehelper.writePostToFile(post, output)
+            filehelper.findMatchingMedia(post, input, output)
+            filehelper.writePostToFile(post, output)
+        except Exception as e:
+            logging.error("Processing post " + post["id"] + " has failed due to: " + str(e))
 
     filehelper.writeIndexFile(allPosts, output)
     filehelper.writeListFile(allPosts, output)
