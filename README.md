@@ -6,9 +6,9 @@ Currently only supports the json version of the archive output from BDfR V2.
 
 **Usage**
 
-`python3 bdfrToHTML.py --input ./location/of/archive/and/downloads --output /../html/`
+`python -m bdfrtohtml --input ./location/of/archive/and/downloads --output /../html/`
 
-Use `python3 bdfrToHTML.py --help` for a list of options
+Use `python -m bdfr-html --help` for a list of options
 
 **Docker-Compose**
 
@@ -22,11 +22,11 @@ To run the compose file, simply clone this repo and run `docker-compose up`.
 
 - Use the --archive_context option to pull the related contextual post for downloaded comments (requires BDfR in the same folder).
 - Use the --recover_comments option to have the script attempt to pull deleted comments from Pushshift. 
-- Script can be instructed to watch the input folder using --watch_folder and --watch_freq
-- The script now actively avoids reprocessing inputs by storing a list of processed ids in the output folder
+- The script now actively avoids reprocessing inputs by storing a list of processed ids in the output folder.
+- Produces an ID file of processed posts which can be fed to bdfr to avoid re-downloading content. 
+- Templated HTML using jinja2 which can be easily modified to suit your needs.
 
 **Planned Features**
 
 - Using Pushshift to pull deleted post contents 
 - Adding an optional archiver to archive webpages linked in posts
-- Possible static-site generation
