@@ -1,0 +1,8 @@
+<div class=photoGrid>
+    <div class=row>
+    {% for path in post.paths %}
+       <div class=column><a href="{{ path }}"><img src="{{ path }}" style="width:100%"></a></div>
+    {% endfor %}
+    </div>
+</div>
+

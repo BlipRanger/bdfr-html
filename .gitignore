@@ -1,1 +1,6 @@
 .vscode/settings.json
+/venv/
+.idea
+html/
+temp/
+__pycache__/

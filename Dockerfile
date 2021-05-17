@@ -3,10 +3,12 @@ FROM python:3.9
 RUN apt-get update
 RUN apt-get install ffmpeg -y
 
-COPY ./requirements.txt requirements.txt
-COPY ./bdfrToHTML.py bdfrToHTML.py
-COPY ./style.css style.css
-COPY ./start.py start.py
+
+WORKDIR /bdfrh
+COPY ./bdfrtohtml/ ./bdfrtohtml
+COPY ./templates/ ./templates
+COPY ./start.py ./start.py
+COPY ./requirements.txt ./requirements.txt
 
 ENV BDFR_FREQ=15
 ENV BDFR_IN=/input
