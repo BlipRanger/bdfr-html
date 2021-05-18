@@ -8,7 +8,7 @@ Currently only supports the json version of the archive output from BDfR V2.
 
 `python -m bdfrtohtml --input ./location/of/archive/and/downloads --output /../html/`
 
-Use `python -m bdfr-html --help` for a list of options
+Use `python -m bdfrtohtml --help` for a list of options
 
 **Docker-Compose**
 
