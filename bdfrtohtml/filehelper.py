@@ -64,7 +64,8 @@ def copy_media(source_path, output_path):
             # This fixes mp4 files that won't play in browsers
             command = 'ffmpeg -nostats -loglevel 0 -i "{input}" -c:v copy -c:a copy -y "{output}"'.format(
                 input=source_path, output=output_path)
-            subprocess.check_output(command)
+            logging.debug("Running " + command)
+            subprocess.call(command)
         except Exception as e:
             logging.error('FFMPEG failed: ' + str(e))
     else:
@@ -92,6 +93,7 @@ def find_matching_media(post, input_folder, output_folder):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json'):
                 logging.debug("Find Matching Media found: " + dirpath + f)
+                logging.debug("Copying from")
                 copy_media(os.path.join(dirpath, f), os.path.join(media_folder, f))
                 paths.append(os.path.join('media/', f))
     post['paths'] = paths

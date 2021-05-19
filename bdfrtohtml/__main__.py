@@ -49,6 +49,7 @@ def main(input, output, recover_comments, archive_context, delete_input):
 
     if delete_input:
         filehelper.empty_input_folder(input)
+    logging.info("BDFRToHTML run complete.")
 
 
 if __name__ == '__main__':

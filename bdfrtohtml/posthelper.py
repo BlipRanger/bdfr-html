@@ -1,7 +1,3 @@
-__author__ = "BlipRanger"
-__version__ = "1.3.0"
-__license__ = "GNU GPLv3"
-
 import logging
 import subprocess
 import requests
@@ -54,12 +50,9 @@ def get_comment_context(post, input_folder):
                              context_folder])
         except Exception as e:
             logging.error(e)
-        print(post['id'])
         for dirpath, dnames, fnames in os.walk(context_folder):
             for f in fnames:
-                print(f)
                 if post['id'] in f and f.endswith('.json'):
-                    print("Loaded")
                     post = filehelper.load_json(os.path.join(dirpath, f))
 
         for comment in post["comments"]:
