@@ -16,6 +16,8 @@ services:
     volumes:
       - output:/output                      #Shared docker volume between the script container and the webserver, could also be mounted
       - ./config:/root/.config/bdfr/        #Mounted folder where the bdfr config file lives
+    ports:
+      - "7634:7634"
   apache:                                   #Standard webserver serving the content located in the BDFR_OUT var
     image: httpd:alpine
     container_name: bdfr-server
