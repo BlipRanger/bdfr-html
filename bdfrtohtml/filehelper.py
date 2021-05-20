@@ -32,7 +32,6 @@ def import_posts(folder):
 # Write index page
 def write_index_file(post_list, output_folder):
     template = templateEnv.get_template("index.html")
-
     with open(os.path.join(output_folder, "index.html"), 'w', encoding="utf-8") as file:
         file.write(template.render(posts=post_list))
     logging.debug('Wrote ' + os.path.join(output_folder, "index.html"))
@@ -97,7 +96,7 @@ def find_matching_media(post, input_folder, output_folder):
                 copy_media(os.path.join(dirpath, f), os.path.join(media_folder, f))
                 paths.append(os.path.join('media/', f))
     post['paths'] = paths
-    return
+    return post
 
 
 # Creates the html for a post using the jinja2 template and writes it to a file

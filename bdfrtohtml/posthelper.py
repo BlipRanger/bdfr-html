@@ -7,6 +7,35 @@ import os
 logger = logging.getLogger(__name__)
 
 
+def get_sub_from_post(post):
+    if post.get('subreddit') == None:
+        link = post['permalink']
+        post['subreddit'] = link.split('/')[2]
+    return post
+
+def recover_deleted_posts(post):
+    if post['selftext'] == '[deleted]':
+        post = recover_deleted_post(post)
+    return post
+
+
+def recover_deleted_post(post):
+    try:
+        response = requests.get("https://api.pushshift.io/reddit/submission/search?ids={id}".format(id=post['id']))
+        data = response.json()['data']
+        logger.debug(data)
+        logger.debug(len(data))
+        if len(data) == 1:
+            recovered_post = data[0]
+            post['selftext'] = recovered_post['selftext']
+            post['author'] = recovered_post['author']
+            post['url'] = recovered_post['url']
+            post['recovered'] = True
+            logging.info('Recovered ' + post.get('id', '') + ' from pushshift')
+    except Exception as e:
+        logging.error(e)
+    return post
+
 # Request a specific comment to be recovered
 def recover_deleted_comment(comment):
     try:
@@ -54,6 +83,7 @@ def get_comment_context(post, input_folder):
             for f in fnames:
                 if post['id'] in f and f.endswith('.json'):
                     post = filehelper.load_json(os.path.join(dirpath, f))
+                    logging.debug("Post context created for: " + post['id'])
 
         for comment in post["comments"]:
             if comment["id"] == id:
@@ -63,7 +93,6 @@ def get_comment_context(post, input_folder):
                 if reply["id"] == id:
                     reply["is_saved"] = True
                     break
-
     return post
 
 
@@ -73,12 +102,12 @@ def handle_comments(comment):
     if comment.get('parent_id') is None:
         return comment
 
-    post = comment
-    post["title"] = "Comment on " + post["submission_title"]
-    post["savedcomment"] = comment['id']
-    post["id"] = comment['submission']
-    post["comments"] = post["replies"]
-    post["selftext"] = post["body"]
-    post["permalink"] = "https://www.reddit.com/r/{subreddit}/comments/{submission}/{title}/{id}".format(
-        subreddit=post["subreddit"], submission=post["submission"], title=post["title"], id=post["id"]
+    comment["title"] = "Comment on " + comment["submission_title"]
+    comment["savedcomment"] = comment['id']
+    comment["id"] = comment['submission']
+    comment["comments"] = comment["replies"]
+    comment["selftext"] = comment["body"]
+    comment["permalink"] = "https://www.reddit.com/r/{subreddit}/comments/{submission}/{title}/{id}".format(
+        subreddit=comment["subreddit"], submission=comment["submission"], title=comment["title"], id=comment["id"]
     )
+    return comment
