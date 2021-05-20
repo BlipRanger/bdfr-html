@@ -62,7 +62,7 @@ def copy_media(source_path, output_path):
         try:
             # This fixes mp4 files that won't play in browsers
             command = ['ffmpeg', '-nostats', '-loglevel', '0', '-i', source_path, '-c:v', 'copy',
-             '-c:a', 'copy', '-y', output_path]
+                       '-c:a', 'copy', '-y', output_path]
             logging.debug("Running " + str(command))
             subprocess.call(command)
         except Exception as e:

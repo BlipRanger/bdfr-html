@@ -8,10 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_sub_from_post(post):
-    if post.get('subreddit') == None:
+    if post.get('subreddit') is None:
         link = post['permalink']
         post['subreddit'] = link.split('/')[2]
     return post
+
 
 def recover_deleted_posts(post):
     if post['selftext'] == '[deleted]':
@@ -35,6 +36,7 @@ def recover_deleted_post(post):
     except Exception as e:
         logging.error(e)
     return post
+
 
 # Request a specific comment to be recovered
 def recover_deleted_comment(comment):
