@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='bdfrtohtml',
     packages=['bdfrtohtml'],
-    version='1.3.0',
+    version='1.3.1',
     description='Convert the output of BDFR to HTML',
     author='BlipRanger',
     author_email='blipranger@shrubbery.co',

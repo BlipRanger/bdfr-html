@@ -32,7 +32,6 @@ def import_posts(folder):
 # Write index page
 def write_index_file(post_list, output_folder):
     template = templateEnv.get_template("index.html")
-
     with open(os.path.join(output_folder, "index.html"), 'w', encoding="utf-8") as file:
         file.write(template.render(posts=post_list))
     logging.debug('Wrote ' + os.path.join(output_folder, "index.html"))
@@ -62,9 +61,10 @@ def copy_media(source_path, output_path):
     if output_path.endswith('mp4'):
         try:
             # This fixes mp4 files that won't play in browsers
-            command = 'ffmpeg -nostats -loglevel 0 -i "{input}" -c:v copy -c:a copy -y "{output}"'.format(
-                input=source_path, output=output_path)
-            subprocess.check_output(command)
+            command = ['ffmpeg', '-nostats', '-loglevel', '0', '-i', source_path, '-c:v', 'copy',
+                       '-c:a', 'copy', '-y', output_path]
+            logging.debug("Running " + str(command))
+            subprocess.call(command)
         except Exception as e:
             logging.error('FFMPEG failed: ' + str(e))
     else:
@@ -92,10 +92,11 @@ def find_matching_media(post, input_folder, output_folder):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json'):
                 logging.debug("Find Matching Media found: " + dirpath + f)
+                logging.debug("Copying from")
                 copy_media(os.path.join(dirpath, f), os.path.join(media_folder, f))
                 paths.append(os.path.join('media/', f))
     post['paths'] = paths
-    return
+    return post
 
 
 # Creates the html for a post using the jinja2 template and writes it to a file

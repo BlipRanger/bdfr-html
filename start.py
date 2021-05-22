@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-
-__author__ = "BlipRanger"
-__version__ = "0.1.2"
-__license__ = "GNU GPLv3"
-
 import os
 import subprocess
 import time
@@ -26,6 +21,6 @@ while True:
                          "--authenticate", inFolder])
         subprocess.call(["python3.9", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", limit,
                          "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", inFolder])
-    subprocess.call(["python3.9", "bdfrToHTML.py", "--input", inFolder, "--output", outFolder, "--recover_comments",
+    subprocess.call(["python3.9", "-m", "bdfrtohtml", "--input", inFolder, "--output", outFolder, "--recover_comments",
                      recover_comments, "--archive_context", archive_context, "--delete_input", delete])
     time.sleep(int(freq)*60)
