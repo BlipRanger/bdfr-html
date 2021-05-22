@@ -61,9 +61,10 @@ def main(input, output, recover_comments, recover_posts, archive_context, delete
     if delete_input:
         filehelper.empty_input_folder(input)
 
-    logging.info("BDFRToHTML run complete.")
+    logging.info("BDFR-HTML run complete.")
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    logging.basicConfig(level=LOGLEVEL)
     main()

@@ -26,6 +26,7 @@ def import_posts(folder):
                 if data.get("id") is not None:
                     post_list.append(data)
                     logging.debug('Imported  ' + os.path.join(dirpath, f))
+    logging.info("Loaded {} json files.".format(len(post_list)))
     return post_list
 
 
@@ -82,17 +83,16 @@ def find_matching_media(post, input_folder, output_folder):
     for dirpath, dnames, fnames in os.walk(existing_media):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json') and not f.endswith('.html'):
-                logging.debug("Find Matching Media found: " + dirpath + f)
+                logging.debug("Existing media found: {}".format(os.path.join(dirpath + f)))
                 paths.append(os.path.join('media/', f))
     if len(paths) > 0:
-        logging.debug("Existing media found for " + post['id'])
+        logging.debug("Existing media found for {}".format(post['id']))
         post['paths'] = paths
         return
     for dirpath, dnames, fnames in os.walk(input_folder):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json'):
-                logging.debug("Find Matching Media found: " + dirpath + f)
-                logging.debug("Copying from")
+                logging.debug("New matching media found: {}".format(os.path.join(dirpath + f)))
                 copy_media(os.path.join(dirpath, f), os.path.join(media_folder, f))
                 paths.append(os.path.join('media/', f))
     post['paths'] = paths
@@ -107,7 +107,7 @@ def write_post_to_file(post, output_folder):
 
     with open(post['filepath'], 'w', encoding="utf-8") as file:
         file.write(template.render(post=post))
-    logging.debug('Wrote ' + post['filepath'])
+    logging.debug('Wrote {}'.format(post['filepath']))
 
 
 # Write a list of successful ids to a file
@@ -123,7 +123,7 @@ def empty_input_folder(input_folder):
     for root, dirs, files in os.walk(input_folder):
         for file in files:
             os.remove(os.path.join(root, file))
-            logger.debug("Removed: " + os.path.join(root, file))
+            logger.debug("Deleted: {}".format(os.path.join(root, file)))
         for dir in dirs:
             shutil.rmtree(os.path.join(root, dir))
-            logger.debug("Removed: " + os.path.join(root, dir))
+            logger.debug("Deleted: {}".format(os.path.join(root, dir)))
