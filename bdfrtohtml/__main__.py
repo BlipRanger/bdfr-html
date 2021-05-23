@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 @click.option('--archive_context', default=False, type=bool,
               help='Should we attempt to archive the contextual post for saved comments?')
 @click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
-def main(input, output, recover_comments, recover_posts, archive_context, delete_input):
+@click.option('--write_links_to_file', default='None', type=click.Choice(['None', 'Webpages', 'All'], case_sensitive=False), 
+              help='Should we write the links from posts to a text file for external consuption?')
+def main(input, output, recover_comments, recover_posts, archive_context, delete_input, write_links_to_file):
     output = filehelper.assure_path_exists(output)
     input = filehelper.assure_path_exists(input)
     filehelper.assure_path_exists(os.path.join(output, "media/"))
@@ -49,21 +51,25 @@ def main(input, output, recover_comments, recover_posts, archive_context, delete
             filehelper.write_post_to_file(post, output)
             posts_to_write.append(post)
         except Exception as e:
-            logging.error("Processing post " + post["id"] + " has failed due to: " + str(e))
+            logging.error(f"Processing post {post['id']} has failed due to: {str(e)}")
 
     posts_to_write = sorted(posts_to_write, key=lambda d: d['created_utc'], reverse=True)
     filehelper.write_index_file(posts_to_write, output)
     filehelper.write_list_file(posts_to_write, output)
     shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
 
+    if write_links_to_file != "None":
+        filehelper.write_url_file(posts_to_write, output, write_links_to_file)
     if archive_context:
         filehelper.empty_input_folder(os.path.join(input, "context/"))
     if delete_input:
         filehelper.empty_input_folder(input)
 
-    logging.info("BDFRToHTML run complete.")
+
+    logging.info("BDFR-HTML run complete.")
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    logging.basicConfig(level=LOGLEVEL)
     main()
