@@ -32,7 +32,7 @@ def recover_deleted_post(post):
             post['author'] = recovered_post['author']
             post['url'] = recovered_post['url']
             post['recovered'] = True
-            logging.info('Recovered {} from pushshift'.format(post.get('id', '')))
+            logging.info(f"Recovered {post.get('id', '')} from pushshift")
     except Exception as e:
         logging.error(e)
     return post
@@ -49,7 +49,7 @@ def recover_deleted_comment(comment):
             comment['body'] = rev_comment['body']
             comment['score'] = rev_comment['score']
             comment['recovered'] = True
-            logging.info('Recovered {} from pushshift'.format(comment.get('id', '')))
+            logging.info(f"Recovered {comment.get('id', '')} from pushshift")
     except Exception as e:
         logging.error(e)
     return comment
@@ -85,7 +85,7 @@ def get_comment_context(post, input_folder):
             for f in fnames:
                 if post['id'] in f and f.endswith('.json'):
                     post = filehelper.load_json(os.path.join(dirpath, f))
-                    logging.debug("Post context created for: {}".format(post['id']))
+                    logging.debug(f"Post context created for: {post['id']}")
 
         for comment in post["comments"]:
             if comment["id"] == id:

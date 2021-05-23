@@ -25,8 +25,8 @@ def import_posts(folder):
                 data = load_json(os.path.join(dirpath, f))
                 if data.get("id") is not None:
                     post_list.append(data)
-                    logging.debug('Imported  ' + os.path.join(dirpath, f))
-    logging.info("Loaded {} json files.".format(len(post_list)))
+                    logging.debug(f'Imported  {os.path.join(dirpath, f)}')
+    logging.info(f"Loaded {len(post_list)} json files.")
     return post_list
 
 
@@ -35,7 +35,7 @@ def write_index_file(post_list, output_folder):
     template = templateEnv.get_template("index.html")
     with open(os.path.join(output_folder, "index.html"), 'w', encoding="utf-8") as file:
         file.write(template.render(posts=post_list))
-    logging.debug('Wrote ' + os.path.join(output_folder, "index.html"))
+    logging.debug(f'Wrote {os.path.join(output_folder, "index.html")}')
 
 
 # Check for path, create if does not exist
@@ -44,7 +44,7 @@ def assure_path_exists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
-        logging.debug("Created " + dir)
+        logging.debug(f"Created {dir}")
     return dir
 
 
@@ -53,7 +53,7 @@ def load_json(file_path):
     f = open(file_path, )
     data = json.load(f)
     f.close()
-    logging.debug('Loaded ' + file_path)
+    logging.debug(f'Loaded {file_path}')
     return data
 
 
@@ -64,13 +64,13 @@ def copy_media(source_path, output_path):
             # This fixes mp4 files that won't play in browsers
             command = ['ffmpeg', '-nostats', '-loglevel', '0', '-i', source_path, '-c:v', 'copy',
                        '-c:a', 'copy', '-y', output_path]
-            logging.debug("Running " + str(command))
+            logging.debug(f"Running {command}")
             subprocess.call(command)
         except Exception as e:
             logging.error('FFMPEG failed: ' + str(e))
     else:
         shutil.copyfile(source_path, output_path)
-    logging.debug('Moved ' + source_path + ' to ' + output_path)
+    logging.debug(f'Moved {source_path} to {output_path}')
 
 
 # Search the input folder for media files containing the id value from an archive
@@ -83,16 +83,16 @@ def find_matching_media(post, input_folder, output_folder):
     for dirpath, dnames, fnames in os.walk(existing_media):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json') and not f.endswith('.html'):
-                logging.debug("Existing media found: {}".format(os.path.join(dirpath + f)))
+                logging.debug(f"Existing media found: {os.path.join(dirpath + f)}")
                 paths.append(os.path.join('media/', f))
     if len(paths) > 0:
-        logging.debug("Existing media found for {}".format(post['id']))
+        logging.debug(f"Existing media found for {post['id']}")
         post['paths'] = paths
         return
     for dirpath, dnames, fnames in os.walk(input_folder):
         for f in fnames:
             if post['id'] in f and not f.endswith('.json'):
-                logging.debug("New matching media found: {}".format(os.path.join(dirpath + f)))
+                logging.debug(f"New matching media found: {os.path.join(dirpath + f)}")
                 copy_media(os.path.join(dirpath, f), os.path.join(media_folder, f))
                 paths.append(os.path.join('media/', f))
     post['paths'] = paths
@@ -107,7 +107,7 @@ def write_post_to_file(post, output_folder):
 
     with open(post['filepath'], 'w', encoding="utf-8") as file:
         file.write(template.render(post=post))
-    logging.debug('Wrote {}'.format(post['filepath']))
+    logging.debug(f"Wrote {post['filepath']}")
 
 
 # Write a list of successful ids to a file
@@ -117,13 +117,24 @@ def write_list_file(posts, output_folder):
         for post in posts:
             file.write(post['id'] + '\n')
 
+# Write a list of post urls to a file
+def write_url_file(posts, output_folder, mode):
+    filepath = os.path.join(output_folder, "urls.txt")
+    with open(filepath, 'w', encoding="utf-8") as file:
+        for post in posts:
+            url = post.get('url')
+            if url and mode == 'Webpages':
+                if url.endswith('/'):
+                    file.write(url + '\n')
+            if url and mode == 'All':
+                file.write(url + '\n')
 
 # Delete the contents of the input folder
 def empty_input_folder(input_folder):
     for root, dirs, files in os.walk(input_folder):
         for file in files:
             os.remove(os.path.join(root, file))
-            logger.debug("Deleted: {}".format(os.path.join(root, file)))
+            logger.debug(f"Deleted: {os.path.join(root, file)}")
         for dir in dirs:
             shutil.rmtree(os.path.join(root, dir))
-            logger.debug("Deleted: {}".format(os.path.join(root, dir)))
+            logger.debug(f"Deleted: {os.path.join(root, dir)}")
