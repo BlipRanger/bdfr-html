@@ -14,7 +14,7 @@
         {%- endif %}
         {% if post.paths | length == 1 %}
             {% if '.gif' in post.paths[0] or '.jpg' in post.paths[0] or '.jpeg' in post.paths[0] or'.png' in post.paths[0] %}
-                <a href="{{ post.paths[0] }}"><img src="{{ post.paths[0] }}"></a>
+                <a href="{{ post.paths[0] }}"><img src="{{ post.paths[0] }}" loading="lazy"></a>
             {% endif %}
             {% if '.mp4' in post.paths[0] or '.m4a' in post.paths[0] %}
                 <video max-height="500" controls preload="metadata"><source src="{{ post.paths[0] }}"></video>
