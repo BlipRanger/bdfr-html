@@ -20,12 +20,13 @@ logger = logging.getLogger(__name__)
 @click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
 @click.option('--recover_comments', default=False, type=bool, help='Should we attempt to recover deleted comments?')
 @click.option('--recover_posts', default=False, type=bool, help='Should we attempt to recover deleted posts?')
+@click.option('--generate_thumbnails', default=True, type=bool, help='Generate thumbnails for video posts?')
 @click.option('--archive_context', default=False, type=bool,
               help='Should we attempt to archive the contextual post for saved comments?')
 @click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
 @click.option('--write_links_to_file', default='None', type=click.Choice(['None', 'Webpages', 'All'], case_sensitive=False), 
               help='Should we write the links from posts to a text file for external consuption?')
-def main(input, output, recover_comments, recover_posts, archive_context, delete_input, write_links_to_file):
+def main(input, output, recover_comments, recover_posts, generate_thumbnails, archive_context, delete_input, write_links_to_file):
     output = filehelper.assure_path_exists(output)
     input = filehelper.assure_path_exists(input)
     filehelper.assure_path_exists(os.path.join(output, "media/"))
@@ -64,6 +65,8 @@ def main(input, output, recover_comments, recover_posts, archive_context, delete
         filehelper.empty_input_folder(os.path.join(input, "context/"))
     if delete_input:
         filehelper.empty_input_folder(input)
+    if generate_thumbnails:
+        filehelper.generate_thumbnails(posts_to_write, output)
 
 
     logging.info("BDFR-HTML run complete.")
