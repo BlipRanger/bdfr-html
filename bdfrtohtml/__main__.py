@@ -9,6 +9,7 @@ import click
 import shutil
 from bdfrtohtml import filehelper
 from bdfrtohtml import posthelper
+from bdfrtohtml import util
 import logging
 import copy
 
@@ -16,20 +17,31 @@ logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option('--input', default='./', help='The folder where the download and archive results have been saved to')
-@click.option('--output', default='./html/', help='Folder where the HTML results should be created.')
-@click.option('--recover_comments', default=False, type=bool, help='Should we attempt to recover deleted comments?')
-@click.option('--recover_posts', default=False, type=bool, help='Should we attempt to recover deleted posts?')
-@click.option('--generate_thumbnails', default=True, type=bool, help='Generate thumbnails for video posts?')
-@click.option('--archive_context', default=False, type=bool,
+@click.option('--input_folder', default=None, help='The folder where the download and archive results have been saved to')
+@click.option('--output_folder', default=None, help='Folder where the HTML results should be created.')
+@click.option('--recover_comments', type=bool, help='Should we attempt to recover deleted comments?')
+@click.option('--recover_posts', type=bool, help='Should we attempt to recover deleted posts?')
+@click.option('--generate_thumbnails', type=bool, help='Generate thumbnails for video posts?')
+@click.option('--archive_context', type=bool,
               help='Should we attempt to archive the contextual post for saved comments?')
-@click.option('--delete_input', default=False, type=bool, help='Should we delete the input after creating the output?')
-@click.option('--write_links_to_file', default='None', type=click.Choice(['None', 'Webpages', 'All'], case_sensitive=False), 
+@click.option('--delete_media', type=bool, help='Should we delete the input media after creating the output?')
+@click.option('--write_links_to_file', type=click.Choice(['None', 'Webpages', 'All'], case_sensitive=False), 
               help='Should we write the links from posts to a text file for external consuption?')
-def main(input, output, recover_comments, recover_posts, generate_thumbnails, archive_context, delete_input, write_links_to_file):
-    output = filehelper.assure_path_exists(output)
-    input = filehelper.assure_path_exists(input)
+@click.option('--config', type=click.File('r'), help='Read in a config file')
+@click.pass_context
+def main(context: click.Context, **_):
+
+    if context.params.get('config'):
+        config = util.load_config(context.params.get('config'))
+    else:
+        config = util.generate_default_config()
+    config = util.process_click_arguments(config, context)
+    logging.debug(config)
+
+    output = filehelper.assure_path_exists(config['output_folder'])
+    input = filehelper.assure_path_exists(config['input_folder'])
     filehelper.assure_path_exists(os.path.join(output, "media/"))
+    
 
     # Load all of the json files
     all_posts = filehelper.import_posts(input)
@@ -40,11 +52,11 @@ def main(input, output, recover_comments, recover_posts, generate_thumbnails, ar
         post = copy.deepcopy(entry)
         try:
             post = posthelper.handle_comments(post)
-            if recover_comments:
+            if config['recover_comments']:
                 post = posthelper.recover_deleted_comments(post)
-            if archive_context:
+            if config['archive_context']:
                 post = posthelper.get_comment_context(post, input)
-            if recover_posts:
+            if config['recover_posts']:
                 post = posthelper.recover_deleted_posts(post)
                 
             post = posthelper.get_sub_from_post(post)
@@ -59,13 +71,13 @@ def main(input, output, recover_comments, recover_posts, generate_thumbnails, ar
     filehelper.write_list_file(posts_to_write, output)
     shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
 
-    if write_links_to_file != "None":
-        filehelper.write_url_file(posts_to_write, output, write_links_to_file)
-    if archive_context:
+    if config['write_links_to_file'] != "None":
+        filehelper.write_url_file(posts_to_write, output, config['write_links_to_file'])
+    if config['archive_context']:
         filehelper.empty_input_folder(os.path.join(input, "context/"))
-    if delete_input:
+    if config['delete_media']:
         filehelper.empty_input_folder(input)
-    if generate_thumbnails:
+    if config['generate_thumbnails']:
         filehelper.generate_thumbnails(posts_to_write, output)
 
 
