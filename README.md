@@ -21,13 +21,17 @@ To run the compose file, simply clone this repo and run `docker-compose up`.
 
 **Additional Features**
 
-- Use the --archive_context option to pull the related contextual post for downloaded comments (requires BDfR in the same folder).
-- Use the --recover_comments option to have the script attempt to pull deleted comments from Pushshift. 
+- Use the --archive_context option to pull the related contextual post for downloaded comments.
+- Use the --recover_comments and --recover_posts options to have the script attempt to pull deleted comments and posts from Pushshift. 
 - The script now actively avoids reprocessing inputs by storing a list of processed ids in the output folder.
 - Produces an ID file of processed posts which can be fed to bdfr to avoid re-downloading content. 
 - Templated HTML using jinja2 which can be easily modified to suit your needs.
+- Use --write_links_to_file option to write a list of urls for webpages and/or media referenced by posts to a file to use in other processes
+- Posts are sorted in chronological order
 
 **Planned Features**
 
-- Using Pushshift to pull deleted post contents 
-- Adding an optional archiver to archive webpages linked in posts
+- Improved HTML templates
+- Config file instead of just arguments
+- Better docs
+- Additional possible docker-compose configs
