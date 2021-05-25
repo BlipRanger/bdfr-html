@@ -8,7 +8,7 @@ services:
     volumes:
       - output:/bdfrh/output                      #Shared docker volume between the script container and the webserver, could also be mounted
       - ./config:/root/.config/bdfr/        #Mounted folder where the bdfr config file lives
-      #- ./cfg/:/bdfrh/config               #If you'd like to mount the cfg file for bdfrhtml
+      - ./config/:/bdfrh/config               #If you'd like to mount the cfg file for bdfrhtml
     ports:
       - "7634:7634"
   apache:                                   #Standard webserver serving the content located in the BDFR_OUT var
