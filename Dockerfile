@@ -9,8 +9,6 @@ COPY ./bdfrtohtml/ ./bdfrtohtml
 COPY ./templates/ ./templates
 COPY ./start.py ./start.py
 COPY ./requirements.txt ./requirements.txt
-
-VOLUME ["/bdfrh/config/"]
 COPY ./config.yml ./config/config.yml
 
 EXPOSE 5000
