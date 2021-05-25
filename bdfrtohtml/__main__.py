@@ -61,12 +61,17 @@ def main(context: click.Context, **_):
                 
             post = posthelper.get_sub_from_post(post)
             filehelper.find_matching_media(post, input, output)
+
+            if config['generate_thumbnails']:
+                filehelper.generate_thumbnail(post, output)
+                
             filehelper.write_post_to_file(post, output)
             posts_to_write.append(post)
         except Exception as e:
             logging.error(f"Processing post {post['id']} has failed due to: {str(e)}")
 
     posts_to_write = sorted(posts_to_write, key=lambda d: d['created_utc'], reverse=True)
+
     filehelper.write_index_file(posts_to_write, output)
     filehelper.write_list_file(posts_to_write, output)
     shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
@@ -77,8 +82,6 @@ def main(context: click.Context, **_):
         filehelper.empty_input_folder(os.path.join(input, "context/"))
     if config['delete_media']:
         filehelper.empty_input_folder(input)
-    if config['generate_thumbnails']:
-        filehelper.generate_thumbnails(posts_to_write, output)
 
 
     logging.info("BDFR-HTML run complete.")

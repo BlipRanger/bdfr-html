@@ -17,7 +17,7 @@
                 <a href="{{ post.paths[0] }}"><img src="{{ post.paths[0] }}" loading="lazy"></a>
             {% endif %}
             {% if '.mp4' in post.paths[0] or '.m4a' in post.paths[0] %}
-                <video max-height="500" controls poster='./thumbnails/{{ post.id }}_thumb.jpg' preload="metadata"><source src="{{ post.paths[0] }}"></video>
+                <video max-height="500" controls {% if post.thumbnail %} poster='./thumbnails/{{ post.thumbnail }}'{% endif %} preload="metadata"><source src="{{ post.paths[0] }}"></video>
             {% endif %}
         {% endif %}
         {% if post.paths | length > 1 %}
