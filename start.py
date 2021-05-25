@@ -8,7 +8,7 @@ import yaml
 # Load in a yaml config file
 def load_config(config_file):
     with open(config_file,'r') as stream:
-        cfg = yaml.safe_load(stream).get('bdfrh')
+        cfg = yaml.safe_load(stream).get('bdfrhtml')
     return cfg
 
 config = load_config("config.yml")
