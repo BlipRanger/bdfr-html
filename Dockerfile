@@ -11,7 +11,7 @@ COPY ./start.py ./start.py
 COPY ./requirements.txt ./requirements.txt
 
 VOLUME ["/bdfrh/config/"]
-COPY ./config.yml .config/config.yml
+COPY ./config.yml ./config/config.yml
 
 EXPOSE 5000
 EXPOSE 7634
