@@ -139,29 +139,27 @@ def empty_input_folder(input_folder):
             shutil.rmtree(os.path.join(root, dir))
             logger.debug(f"Deleted: {os.path.join(root, dir)}")
 
-# Create thumbnail
-def generate_thumbnails(posts, output_folder):
+
+def generate_thumbnail(post, output_folder):
+
     thumbnail_folder = os.path.join(output_folder, "thumbnails/")
     assure_path_exists(thumbnail_folder)
 
-    for post in posts:
-        source_file = post.get('paths')
-        if len(source_file) == 1:
-            source_file = os.path.join(output_folder, source_file[0])
-            if source_file.endswith('mp4') or source_file.endswith('m4a'):
-                generate_thumbnail(source_file, thumbnail_folder)
-
-def generate_thumbnail(source_file, thumbnail_folder):
-        filename = os.path.split(source_file)[1]
-        filename = os.path.splitext(filename)[0] + "_thumb.jpg"
-        output_path = os.path.join(thumbnail_folder, filename)
-        try:
-            # Generate a thumbnail from the first frame
-            command = ['ffmpeg', '-nostats', '-loglevel', '0', '-i', source_file, '-ss', 
-                    '00:00:00', '-frames:v', '1', '-y', output_path]
-            logging.debug(f"Running {command}")
-            subprocess.call(command)
-        except Exception as e:
-            logging.error('FFMPEG thumbnail failed: ' + str(e))
-
-        logging.debug(f'Generated {output_path}')
+    source_file = post.get('paths')
+    if source_file is not None and len(source_file) == 1:
+        source_file = os.path.join(output_folder, source_file[0])
+        if source_file.endswith('mp4') or source_file.endswith('m4a'):
+            filename = os.path.split(source_file)[1]
+            filename = os.path.splitext(filename)[0] + "_thumb.jpg"
+            output_path = os.path.join(thumbnail_folder, filename)
+            try:
+                # Generate a thumbnail from the first frame
+                command = ['ffmpeg', '-nostats', '-loglevel', '0', '-i', source_file, '-ss', 
+                        '00:00:00', '-frames:v', '1', '-y', output_path]
+                logging.debug(f"Running {command}")
+                subprocess.call(command)
+            except Exception as e:
+                logging.error('FFMPEG thumbnail failed: ' + str(e))
+            post['thumbnail'] = filename
+            logging.debug(f'Generated {output_path}')
+    return post
