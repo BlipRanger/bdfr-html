@@ -1,9 +1,6 @@
 /*Based on https://github.com/samirelanduk/reddit-save/blob/master/html/style.css */
 
 * {
-    margin: 0;
-    padding: 0;
-    border: 0;
     outline: none;
     font-size: 100%;
     font: inherit;
@@ -265,4 +262,50 @@ button:hover {
     flex: 100%;
     max-width: 100%;
   }
+}
+
+/* Attempt to make collapse-able comments without js lol*/
+input[type='checkbox'] {
+    display: none;
+  }
+  
+.lbl-toggle {
+    display: flex;
+
+}
+
+.collapsible-content {
+    max-height: 0px;
+    overflow: hidden;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+    max-height: 100vh;
+}
+
+.lbl-toggle::before {
+    font-size: 12px;
+    font-weight: 300;
+    display: inline-block;
+    content: '[+]';
+    vertical-align: middle;
+}
+
+.toggle:checked + .lbl-toggle::before {
+    font-size: 12px;
+    font-weight: 300;
+    display: inline-block;
+    content: '[-]';
+  }
+
+.info div{
+    padding-left: 8px;
+}
+
+.comment, .reply {
+    border-left: 1px solid white;
+}
+
+.content {
+    padding-bottom: 8px;
 }
