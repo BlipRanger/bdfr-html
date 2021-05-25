@@ -85,6 +85,6 @@ def main(context: click.Context, **_):
 
 
 if __name__ == '__main__':
-    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    LOGLEVEL = os.environ.get('BDFRH_LOGLEVEL', 'INFO').upper()
     logging.basicConfig(level=LOGLEVEL)
     main()
