@@ -4,7 +4,7 @@ import click
 
 # Load in a yaml config file
 def load_config(config_file):
-    cfg = yaml.safe_load(config_file).get('bdfrh')
+    cfg = yaml.safe_load(config_file).get('bdfrhtml')
     return cfg
 
 # Default settings

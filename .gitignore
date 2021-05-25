@@ -5,3 +5,5 @@ html/
 temp/
 __pycache__/
 config/
+.vscode/.ropeproject/config.py
+.vscode/.ropeproject/objectdb
