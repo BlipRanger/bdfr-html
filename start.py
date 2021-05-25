@@ -2,25 +2,27 @@
 import os
 import subprocess
 import time
+import yaml
 
-freq = os.environ['BDFR_FREQ']
-inFolder = os.environ['BDFR_IN']
-outFolder = os.environ['BDFR_OUT']
-recover_comments = os.environ['BDFR_RECOVER_COMMENTS']
-archive_context = os.environ['BDFR_ARCHIVE_CONTEXT']
-limit = os.environ['BDFR_LIMIT']
-runBdfr = os.environ['RUN_BDFR']
-delete = os.environ['BDFRH_DELETE']
 
-idList = os.path.join(outFolder, "idList.txt")
+# Load in a yaml config file
+def load_config(config_file):
+    with open(config_file,'r') as stream:
+        cfg = yaml.safe_load(stream)
+    return cfg
 
+config = load_config("config.yml")
+bdfr_cfg = config['bdfr']
+bdfrhtml_cfg = config['bdfrhtml']
+
+
+idList = os.path.join(bdfrhtml_cfg['output_folder'], "idList.txt")
 
 while True:
-    if runBdfr:
-        subprocess.call(["python3.9", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", limit,
-                         "--authenticate", inFolder])
-        subprocess.call(["python3.9", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", limit,
-                         "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", inFolder])
-    subprocess.call(["python3.9", "-m", "bdfrtohtml", "--input", inFolder, "--output", outFolder, "--recover_comments",
-                     recover_comments, "--archive_context", archive_context, "--delete_input", delete])
-    time.sleep(int(freq)*60)
+    if bdfr_cfg['run_bdfr']:
+        subprocess.call(["python", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
+                         "--authenticate", bdfrhtml_cfg['input_folder']])
+        subprocess.call(["python", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
+                         "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", bdfrhtml_cfg['input_folder']])
+    subprocess.call(["python", "-m", "bdfrtohtml", "--config", "config.yml"])
+    time.sleep(int(bdfrhtml_cfg['frequency'])*60)
