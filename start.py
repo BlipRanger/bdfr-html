@@ -16,7 +16,7 @@ bdfr_cfg = config['bdfr']
 bdfrhtml_cfg = config['bdfrhtml']
 
 
-idList = os.path.join(bdfr_cfg['output_folder'], "idList.txt")
+idList = os.path.join(bdfrhtml_cfg['output_folder'], "idList.txt")
 
 
 while True:
