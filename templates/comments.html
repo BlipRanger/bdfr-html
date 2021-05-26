@@ -5,23 +5,23 @@
         <div id={{ comment.id }} class="comment">
             <input id={{ comment.id }}_input class="toggle" type="checkbox" checked>
             <label for="{{ comment.id }}_input" class="lbl-toggle">
-                <div class="info {% if comment.recovered %}recovered{% endif %} {% if comment.is_saved %}saved{% endif %}">
+                <div class="info {% if comment.recovered %}recovered{% endif %} {% if comment.is_saved %}saved{% endif %} {% if comment.is_submitter %}op{% endif %}">
                     <a href="https://www.reddit.com{{ post.permalink }}{{ comment.id }}"><div class="time">{{ comment.created_utc | float_to_datetime }}</div></a>
                     <div class="score">({{ comment.score }})</div>
-                    <a href='https://reddit.com/u/{{ comment.author }}'><div class=author>u/{{ comment.author }}</div></a>
+                    <a href='https://reddit.com/u/{{ comment.author }}'><div class="author {% if comment.is_submitter %}op{% endif %}">u/{{ comment.author }}</div></a>
                 </div>
             </label>
             <div class="collapsible-content">
                 <div class=content>{{ comment.body | markdown }}</div>
                 {%- for reply in comment.replies recursive %}
-                    <div class="reply">
-                            <div id={{ reply.id }} class="comment">
+                    <div class="replies">
+                            <div id={{ reply.id }} class="reply">
                                 <input id={{ reply.id }}_input class="toggle" type="checkbox" checked>
                                 <label for="{{ reply.id }}_input" class="lbl-toggle">
                                     <div class="info {% if reply.recovered %}recovered{% endif %} {% if reply.is_saved %}saved{% endif %}">
                                         <a href="https://www.reddit.com{{ post.permalink }}{{ reply.id }}"><div class="time">{{ reply.created_utc | float_to_datetime }}</div></a>
                                         <div class="score">({{ reply.score }})</div>
-                                        <a href='https://reddit.com/u/{{ reply.author }}'><div class=author>u/{{ reply.author }}</div></a>
+                                        <a href='https://reddit.com/u/{{ reply.author }}'><div class="author {% if reply.is_submitter %}op{% endif %}">u/{{ reply.author }}</div></a>
                                     </div>
                                 </label>
                                 <div class="collapsible-content">
