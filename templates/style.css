@@ -110,7 +110,7 @@ h1 {
 }
 
 .replies{
-	min-height: unset%;
+	min-height: unset;
 }
 
 .reply {
@@ -309,7 +309,7 @@ input[type='checkbox'] {
 }
 
 .one-column {
-    min-width: min-content;
+    min-width: 375px;
     margin: auto;
     max-width: 50%;
     display: flex;
