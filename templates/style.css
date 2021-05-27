@@ -308,14 +308,6 @@ input[type='checkbox'] {
     width: max-content;
 }
 
-.one-column {
-    min-width: 375px;
-    margin: auto;
-    max-width: 50%;
-    display: flex;
-    flex-direction: column;
-  }
-
 .post {
     border: gray solid 1px;
     margin-top: 10px;
@@ -398,4 +390,21 @@ input[type='checkbox'] {
 
 .info {
 	height: fit-content;
+}
+
+.one-column {
+    margin: auto;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+@media only screen and (min-width: 768px) {
+    .one-column {
+        min-width: 375px;
+        margin: auto;
+        max-width: 50%;
+        display: flex;
+        flex-direction: column;
+      }
 }
