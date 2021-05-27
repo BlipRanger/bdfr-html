@@ -399,7 +399,7 @@ input[type='checkbox'] {
     flex-direction: column;
   }
 
-@media only screen and (min-width: 768px) {
+  @media only screen and (min-width: 200px) and (max-width: 767px)  {
     .one-column {
         min-width: 375px;
         margin: auto;
@@ -407,4 +407,6 @@ input[type='checkbox'] {
         display: flex;
         flex-direction: column;
       }
-}
+   
+    }
+
