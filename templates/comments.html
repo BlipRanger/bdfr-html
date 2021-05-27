@@ -1,5 +1,5 @@
 {% block comments %}
-<h2>Comments</h2>
+<h2>Comments ({{ post.num_comments }})</h2>
 {% for comment in post.comments-%}
     <div class="comments">      
         <div id={{ comment.id }} class="comment">
@@ -7,7 +7,7 @@
             <label for="{{ comment.id }}_input" class="lbl-toggle">
                 <div class="info {% if comment.recovered %}recovered{% endif %} {% if comment.is_saved %}saved{% endif %} {% if comment.is_submitter %}op{% endif %}">
                     <a href="https://www.reddit.com{{ post.permalink }}{{ comment.id }}"><div class="time">{{ comment.created_utc | float_to_datetime }}</div></a>
-                    <div class="score">({{ comment.score }})</div>
+                    <div class="score {% if comment.stickied %}pinned{% endif %}">({{ comment.score }})</div>
                     <a href='https://reddit.com/u/{{ comment.author }}'><div class="author {% if comment.is_submitter %}op{% endif %}">u/{{ comment.author }}</div></a>
                 </div>
             </label>

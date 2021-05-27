@@ -11,3 +11,4 @@ bdfrhtml:
   delete_media: false                  #Delete input media files after copying them to the media folder
   write_links_to_file: 'None'          #Write the urls for either None, All, or Webpages from posts to a file
   generate_thumbnails: false           #Generate thumbnails for videos, helps with loading on mobile devices
+  index_mode: 'default'

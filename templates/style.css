@@ -1,13 +1,6 @@
 /*Based on https://github.com/samirelanduk/reddit-save/blob/master/html/style.css */
 
 * {
-    outline: none;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
-    list-style: none;
-    background-color: inherit;
-    box-sizing: border-box;
     color: white;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -44,6 +37,7 @@ body {
 img, video {
     max-height: 500px;
     cursor: pointer;
+    max-width: 100%;
 }
 
 a {
@@ -112,7 +106,7 @@ h1 {
 
 .post, .comment, .reply {
 	padding: 12px 16px;
-	
+	text-align: left;
 }
 
 .replies{
@@ -135,6 +129,7 @@ h1 {
 .post h1, .comment h1 {
     padding: 0;
     margin-bottom: 8px;
+    margin-top: 8px;
 }
 
 .post .info {
@@ -310,7 +305,7 @@ input[type='checkbox'] {
   }
 
 .info div{
-    padding-left: 8px;
+    padding-left: 0px;
 }
 
 .comment, .reply {
@@ -320,4 +315,89 @@ input[type='checkbox'] {
 .content {
     padding-bottom: 8px;
     padding-left: 4px;
+}
+
+.icon{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+}
+
+.light_container {
+    position: relative;
+    width: max-content;
+}
+
+.one-column {
+    min-width: 750px;
+    margin: auto;
+    max-width: 50%;
+  }
+
+.post {
+    border: gray solid 1px;
+    margin-top: 10px;
+}
+
+.old_post{
+    margin-top: 8px;
+    max-height: 80px;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 8px;  
+    padding-top: 8px;  
+    padding-bottom: 8px;    
+}
+.old_post .content .light_container{
+    width: 70px;
+    height: 70px;    
+    text-align: right;
+}
+.old_post .content .light_container img{
+    max-width: 70px;
+    max-height: 70px;    
+}
+
+.old_post .info .title h1{
+    margin:0;
+    font-size: 12pt;
+    padding: 0;
+    font-weight: unset;
+  }
+
+.old_post .info {
+    display: flex;
+    flex-direction: column;
+    max-height: 70px;
+    font-size: 10pt;
+}
+
+.old_post .info div{
+    padding: 2px;
+}
+.old_post .content {
+    display: relative;
+    padding-bottom: 8px;
+    padding-left: 4px;
+    width: 70px;
+    margin-right: 20px;
+}
+
+.old_post time, .subreddit, .user {
+    padding-right: 0;
+}
+
+.old_post .icon{
+    font-size: 45px;
+    top:43%;
+}
+
+.pinned {
+    background-color: #16a085;
+}
+
+.mature{
+    color: red;
 }
