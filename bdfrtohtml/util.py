@@ -18,7 +18,7 @@ def generate_default_config():
     'delete_media': False,                                  
     'write_links_to_file': 'None',
     'generate_thumbnails': False,
-    'index_mode': False
+    'index_mode': 'default'
   }
   return cfg
 
