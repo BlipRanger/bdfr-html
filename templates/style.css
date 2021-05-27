@@ -382,6 +382,7 @@ input[type='checkbox'] {
 
 .post .post_info, .links{
 	flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .post .content{
