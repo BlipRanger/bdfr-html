@@ -7,8 +7,7 @@ services:
       - BDFRH_LOGLEVEL=INFO                 #Either INFO or DEBUG for more verbose logs
     volumes:
       - output:/bdfrh/output                      #Shared docker volume between the script container and the webserver, could also be mounted
-      - ./config:/root/.config/bdfr/        #Mounted folder where the bdfr config file lives
-      - ./config/:/bdfrh/config               #If you'd like to mount the cfg file for bdfrhtml
+      - ./config/:/bdfrh/config                   #Config files for both bdfr and bdfr-html
     ports:
       - "7634:7634"
   apache:                                   #Standard webserver serving the content located in the BDFR_OUT var

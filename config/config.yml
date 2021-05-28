@@ -2,6 +2,10 @@ bdfr:
   limit: 1000                          #Number of saved posts to download (Max ~1000)
   run_bdfr: true                       #Run bdfr each time before running bdfr-html
   frequency: 60                        #How often in minutes should we pull saved content from reddit
+  #users:                              #Download saved content for a list of users, you must auth each one
+  #  - User_1
+  #  - User_2
+  #merge_users: false                  #Merge the download and output folders of multi-users?
 bdfrhtml:
   recover_comments: false              #Should bdfr-html try to recover deleted comments from pushshift?
   recover_posts: false                 #Should bdfr-html try to recover deleted posts from pushshift?
