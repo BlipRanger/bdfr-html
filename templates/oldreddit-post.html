@@ -1,0 +1,56 @@
+<div class=old_post>
+    <div class=content>
+        <div class="light_container">
+            {% if post.light_content %}
+            <a href="{{ post.paths[0] }}"><img src="{{ post.light_content }}"></a>
+            {% elif post.paths[0] and post.paths[0].endswith('.txt') %}
+            <a href="{{ post.filename }}">
+                <div class="icon">📄</div>
+            </a>
+            {% elif post.savedcomment %}
+            <a href="{{ post.filename }}">
+                <div class="icon">💾</div>
+            </a>
+            {% elif post.url.endswith('/') or not post.url.endswith('.jpg') or
+            not post.url.endswith('.jpg') or not post.url.endswith('.jpeg') or
+            not post.url.endswith('.mp4') or not post.url.endswith('.gif') or
+            not post.url.endswith('.m4a') or not post.url.endswith('.png') %}
+            <a href="{{ post.url }}">
+                <div class="icon">🔗</div>
+            </a>
+            {% else %}
+            <a href="{{ post.paths[0] }}">
+                <div class="icon">📄</div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="info {% if post.recovered %}recovered{% endif %}">
+        <div class=title>
+            <a href="{{ post.filename }}">
+                <h1>{{ post.title }}</h1>
+            </a>
+        </div>
+        <div class="post_info">
+            Submitted at
+            <time>{{ post.created_utc | float_to_datetime }}</time>
+            to
+            <a href='https://reddit.com/r/{{ post.subreddit }}'>
+
+                <span class="subreddit">r/{{ post.subreddit }}</span>
+            </a>
+            by
+            <a href='https://reddit.com/u/{{ post.author }}'>
+                <span class="user">u/{{ post.author }}</span>
+            </a>
+            <span title="{{ post.upvote_ratio }}" class="score">({{ post.score }})</span>{% if post.over_18 %}<span
+                class=mature> 18+ </span> {% endif %}
+        </div>
+        <div class="links">
+            {% if post.paths %}<a href="{{ post.paths[0] }}">Local Link</a> | {% endif %}
+            <a href="{{ post.url }}">Content link</a>|
+            <a href="https://www.reddit.com{{ post.permalink }}">Reddit Link</a>
+        </div>
+
+    </div>
+</div>
