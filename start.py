@@ -33,15 +33,19 @@ config_path = "config/config.yml"
 config = load_config(config_path)
 bdfr_cfg = config['bdfr']
 bdfrhtml_cfg = config['bdfrhtml']
+input_folder = bdfrhtml_cfg['input_folder']
+output_folder =  bdfrhtml_cfg['output_folder']
 
 if bdfr_cfg.get('users') is not None:
+    merge_users = bdfr_cfg.get('merge_users', False)
+
     while True:
         for user in bdfr_cfg.get('users'):
             bdfr_config_file = os.path.join("config/user_configs/", (user + '.cfg'))
             create_or_copy_config(bdfr_config_file)
-
-            input_folder = os.path.join(bdfrhtml_cfg['input_folder'], (user + '/'))
-            output_folder = os.path.join(bdfrhtml_cfg['output_folder'], (user + '/'))
+            if not merge_users:
+                input_folder = os.path.join(bdfrhtml_cfg['input_folder'], (user + '/'))
+                output_folder = os.path.join(bdfrhtml_cfg['output_folder'], (user + '/'))
             idList = os.path.join(output_folder, "idList.txt")
 
             if bdfr_cfg['run_bdfr']:
@@ -50,14 +54,15 @@ if bdfr_cfg.get('users') is not None:
                                 "--authenticate", input_folder, "--config", bdfr_config_file])
                 subprocess.call(["python", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
                                 "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", input_folder, "--config", bdfr_config_file])
+            if not merge_users:                     
+                subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
+        if merge_users:                     
             subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
         logging.info(f"Runs complete, now waiting for {int(bdfr_cfg['frequency'])} minutes before next run.")
         time.sleep(int(bdfr_cfg['frequency']*60))
         
 else:
     idList = os.path.join(bdfrhtml_cfg['output_folder'], "idList.txt")
-    input_folder = bdfrhtml_cfg['input_folder']
-    output_folder =  bdfrhtml_cfg['output_folder']
     default_config = "config/user_configs/default_config.cfg"
     create_or_copy_config(default_config)
 
