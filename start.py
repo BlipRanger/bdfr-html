@@ -29,6 +29,11 @@ def create_or_copy_config(config_filepath):
         assure_path_exists("config/user_configs")
         shutil.copyfile("config/default_bdfr_config.cfg", config_filepath)
 
+def remove_default_index(output_folder):
+    filepath = os.path.join(output_folder, 'index.html')
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
 config_path = "config/config.yml"
 config = load_config(config_path)
 bdfr_cfg = config['bdfr']
@@ -38,7 +43,8 @@ output_folder =  bdfrhtml_cfg['output_folder']
 
 if bdfr_cfg.get('users') is not None:
     merge_users = bdfr_cfg.get('merge_users', False)
-
+    if merge_users: remove_default_index(output_folder)
+    
     while True:
         for user in bdfr_cfg.get('users'):
             bdfr_config_file = os.path.join("config/user_configs/", (user + '.cfg'))
