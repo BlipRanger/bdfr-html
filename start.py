@@ -26,7 +26,7 @@ def assure_path_exists(path):
 
 def create_or_copy_config(config_filepath):
     if not os.path.exists(config_filepath):
-        assure_path_exists(config_filepath)
+        assure_path_exists("config/user_configs")
         shutil.copyfile("config/default_bdfr_config.cfg", config_filepath)
 
 config_path = "config/config.yml"
