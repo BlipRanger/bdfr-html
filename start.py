@@ -52,7 +52,7 @@ if bdfr_cfg.get('users') is not None:
                                 "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", input_folder, "--config", bdfr_config_file])
             subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
         logging.info(f"Runs complete, now waiting for {int(bdfr_cfg['frequency'])} minutes before next run.")
-        time.sleep(int(bdfr_cfg['frequency']))
+        time.sleep(int(bdfr_cfg['frequency']*60))
         
 else:
     idList = os.path.join(bdfrhtml_cfg['output_folder'], "idList.txt")
