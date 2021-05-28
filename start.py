@@ -51,7 +51,7 @@ if bdfr_cfg.get('users') is not None:
                 subprocess.call(["python", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
                                 "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", input_folder, "--config", bdfr_config_file])
             subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
-        logging.info(f"Runs complete, now waiting for {int(bdfr_cfg['frequency'])*60} minutes before next run.")
+        logging.info(f"Runs complete, now waiting for {int(bdfr_cfg['frequency'])} minutes before next run.")
         time.sleep(int(bdfr_cfg['frequency']))
         
 else:
