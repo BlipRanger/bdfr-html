@@ -15,8 +15,18 @@ def load_config(config_file):
         cfg = yaml.safe_load(stream)
     return cfg
 
+# Check for path, create if does not exist
+def assure_path_exists(path):
+    path = os.path.join(path, '')
+    dir = os.path.dirname(path)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+        logging.debug(f"Created {dir}")
+    return dir
+
 def create_or_copy_config(config_filepath):
     if not os.path.exists(config_filepath):
+        assure_path_exists(config_filepath)
         shutil.copyfile("config/default_bdfr_config.cfg", config_filepath)
 
 config_path = "config/config.yml"
