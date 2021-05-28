@@ -412,3 +412,7 @@ input[type='checkbox'] {
         flex-direction: column;
       }
 }
+
+pre {
+    overflow: auto;
+}
