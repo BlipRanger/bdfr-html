@@ -1,10 +1,11 @@
 # bdfr-html
-Converts the output of the [bulk downloader for reddit (V2)](https://github.com/aliparlakci/bulk-downloader-for-reddit)  to a set of HTML pages. 
+BDFR-HTML is a companion script that the output of the incredibly useful [bulk downloader for reddit](https://github.com/aliparlakci/bulk-downloader-for-reddit) into a set of HTML pages with an index which can be easily viewed in a browser. It also provides a number of other handy tools such as the ability to grab the context for saved comments or deleted posts from Pushshift. The HTML pages are rendered using jinja2 templates and can be easily modified to suit your needs. The script currently requires that you run both the archive and the download portions of the BDfR bulk downloader script and that the names of the downloaded files contain the post id (this is default).
 
-Currently requires that you run both the archive and the download portions of the BDfR bulk downloader script and that the names of the downloaded files contain the post id (this is default).
-Currently only supports the json version of the archive output from BDfR V2. 
+**Table**
 
-**Usage**
+## Installation
+
+Simply clone this repo and run the script as you see fit. I am currently in the process of packaging it to be avalaible on PyPi in the future. 
 
 `python -m bdfrtohtml --input ./location/of/archive/and/downloads --output /../html/`
 

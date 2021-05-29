@@ -54,7 +54,8 @@ def main(input, output, recover_comments, recover_posts, archive_context, delete
     posts_to_write = sorted(posts_to_write, key=lambda d: d['created_utc'], reverse=True)
     filehelper.write_index_file(posts_to_write, output)
     filehelper.write_list_file(posts_to_write, output)
-    shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
+    filehelper.populate_css_file(output)
+
 
     if archive_context:
         filehelper.empty_input_folder(os.path.join(input, "context/"))
