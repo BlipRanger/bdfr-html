@@ -12,7 +12,6 @@ COPY ./requirements.txt ./requirements.txt
 COPY ./config/config.yml ./config/config.yml
 COPY ./config/default_bdfr_config.cfg ./config/default_bdfr_config.cfg
 
-EXPOSE 5000
 EXPOSE 7634
 
 RUN pip install -r requirements.txt

@@ -1,38 +1,67 @@
 # bdfr-html
-BDFR-HTML is a companion script that the output of the incredibly useful [bulk downloader for reddit](https://github.com/aliparlakci/bulk-downloader-for-reddit) into a set of HTML pages with an index which can be easily viewed in a browser. It also provides a number of other handy tools such as the ability to grab the context for saved comments or deleted posts from Pushshift. The HTML pages are rendered using jinja2 templates and can be easily modified to suit your needs. The script currently requires that you run both the archive and the download portions of the BDfR bulk downloader script and that the names of the downloaded files contain the post id (this is default).
+BDFR-HTML is a companion script that turns the output of the incredibly useful [bulk downloader for reddit](https://github.com/aliparlakci/bulk-downloader-for-reddit) into a set of HTML pages with an index which can be easily viewed in a browser. It also provides a number of other handy tools such as the ability to grab the context for saved comments or pull down deleted posts from Pushshift. The HTML pages are rendered using jinja2 templates and can be easily modified to suit your needs. The script currently requires that you run both the archive and the download portions of the BDfR bulk downloader script and that the names of the downloaded files contain the post id (this is default). This can be automated using the included start.py or docker container.
 
-**Table**
+## Table of Contents
+- [bdfr-html](#bdfr-html)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Docker](#docker)
+  - [Contributing](#contributing)
+  - [Planned Features](#planned-features)
 
 ## Installation
 
-Simply clone this repo and run the script as you see fit. I am currently in the process of packaging it to be avalaible on PyPi in the future. 
+You can simply clone this repo and run the script in this folder or you can try your hand at installing the package using setuptools using the following command:
+` python setup.py install`
+(This is still a work in progress)
 
-`python -m bdfrtohtml --input ./location/of/archive/and/downloads --output /../html/`
+## Usage
 
-Use `python -m bdfrtohtml --help` for a list of options
+To run the script with defaults:
+`python -m bdfrtohtml` (the default is to look in the folder 'input' and write to the folder 'output')
 
-**Docker-Compose**
+`python -m bdfrtohtml --input_folder ./location/of/archivedFiles --output_folder /../html/`
 
-For ease of use for both bdfr and bdfr-html in an automated fashion, I have included a docker-compose file which will spin up both an automation container and a web server container. The automation container will run bdfr and then subsequently bdfr-html, producing a volume or mounted folder containing the generated html files. The web server container shares the output volume and hosts the generated files. Currently this is tasked to only save "Saved" user content, however this might be changed in the future. If you would prefer to populate bdfr-html with your own reddit json/media files from bdfr, you can use a similar docker-compose file, but mount the folder where you have saved your content to the `BDFR_IN` folder (/input by default) and set the env variable `RUN_BDFR` to false (default). 
+**Options**
+```
+  --input_folder TEXT                           The folder where the download and archive results have been saved to.
+  --output_folder TEXT                          Folder where the HTML results should be created.
+  --recover_comments BOOLEAN                    Should we attempt to recover deleted comments?
+  --recover_posts BOOLEAN                       Should we attempt to recover deleted posts?
+  --generate_thumbnails BOOLEAN                 Generate thumbnails for video posts? (deprecated by index_mode)
+  --archive_context BOOLEAN                     Should we attempt to archive the contextual post for saved comments?
+  --delete_media BOOLEAN                        Should we delete the input media after creating the output?
+  --index_mode [default|lightweight|oldreddit]  What type of templated index page should be generated?
+  --write_links_to_file [None|Webpages|All]     Should we write the links from posts to a text file for external consuption?
+  --config FILENAME                             Read in a config file
+  --help                                        Show this message and exit.
+```
+
+**start.py**
+The start.py is what (currently) powers the docker container's automation and steps through running both bdfr and bdfr-html in sequence at timed intervals. 
+Instead of running bdfrtohtml alone, you can run `python start.py` in a cloned copy of this repo to start up the automated process.
+The configuration for both bdfrtohtml and the start.py script itself can be found in the (config folder)['https://github.com/BlipRanger/bdfr-html/tree/main/bdfrtohtml'].
+This script also includes multi-user support which can be found in the config file.
+
+## Docker
+
+For ease of use of both bdfr and bdfr-html in an automated fashion, there is included a docker-compose file which will spin up both an automation container and a web server container. The automation container will run bdfr and then subsequently bdfr-html, producing a volume or mounted folder containing the generated html files. The web server container shares the output volume and hosts the generated files. Currently this is tasked to only save "Saved" user content, however this might be changed in the future. If you would prefer to populate bdfr-html with your own reddit json/media files from bdfr, you can use a similar docker-compose file, but mount the folder where you have saved your content to the folder (bdfrtohtml/input by default) and set the config variable `RUN_BDFR` to false. 
 
 Since BDFR 2.1.1 you should be able to properly hit the Oauth within the docker container. The proper port for validation has is exposed in the docker-compose file. 
-If you are running the docker container on a different machine, replace `locahost` in the returned url with the address of the docker host. 
+If you are running the docker container on a different machine, replace `locahost` in the returned Oauth url with the address of the docker host. 
 
 To run the compose file, simply clone this repo and run `docker-compose up`. 
 
-**Additional Features**
+The config file of the docker container can be mounted and modified just like the one mentioned above for the start.py script.  
 
-- Use the --archive_context option to pull the related contextual post for downloaded comments.
-- Use the --recover_comments and --recover_posts options to have the script attempt to pull deleted comments and posts from Pushshift. 
-- The script now actively avoids reprocessing inputs by storing a list of processed ids in the output folder.
-- Produces an ID file of processed posts which can be fed to bdfr to avoid re-downloading content. 
-- Templated HTML using jinja2 which can be easily modified to suit your needs.
-- Use --write_links_to_file option to write a list of urls for webpages and/or media referenced by posts to a file to use in other processes
-- Posts are sorted in chronological order
+## Contributing
+I am open to any and all help or criticism on this project! Please feel free to create issues as you encounter them and I'll work to get them fixed. I have a set idea of the scope of this project, but I am always open to new feature suggestions or improvements to my code. 
 
-**Planned Features**
 
-- Improved HTML templates
-- Config file instead of just arguments
-- Better docs
-- Additional possible docker-compose configs
+## Planned Features
+
+- Better documentation, including a lessons learned page
+- The ability to output more data/metrics
+- Docker support for automatically archiving subreddits/users
+- PyPi + Dockerhub package support
