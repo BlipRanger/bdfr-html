@@ -6,11 +6,12 @@ import json
 import os
 import logging
 from bdfrtohtml import util
+import pkgutil
 from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-templateLoader = jinja2.FileSystemLoader(searchpath="./templates")
+templateLoader = jinja2.ChoiceLoader([jinja2.FileSystemLoader(searchpath="./bdfrtohtml/templates"), jinja2.PackageLoader('bdfrtohtml', 'templates')])
 templateEnv = jinja2.Environment(loader=templateLoader)
 templateEnv.add_extension('jinja2.ext.debug')
 templateEnv.filters["markdown"] = markdown.markdown
@@ -140,6 +141,18 @@ def empty_input_folder(input_folder):
             shutil.rmtree(os.path.join(root, dir))
             logger.debug(f"Deleted: {os.path.join(root, dir)}")
 
+def populate_css_file(output):
+    css_output_path = os.path.join(output, 'style.css')
+    css_input_path = './templates/style.css'
+    if os.path.exists(css_input_path):
+        shutil.copyfile(css_input_path, css_output_path)
+    else:
+        try:
+            data = pkgutil.get_data(__name__, 'templates/style.css')
+            with open(css_output_path, 'wb') as file:
+                file.write(data)
+        except Exception as e:
+            logger.error(e)
 
 def generate_thumbnail(post, output_folder):
 

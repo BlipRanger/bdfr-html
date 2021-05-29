@@ -11,4 +11,8 @@ setup(
     download_url='https://github.com/BlipRanger/bdfr-html/releases/tag/v1.3.0',
     keywords=['bdfr', 'reddit', 'downloader'],
     classifiers=[],
+    package_data={
+        # If any package contains *.txt or *.rst files, include them:
+        "": ["templates/*.html", "templates/*.css"],
+    }
 )

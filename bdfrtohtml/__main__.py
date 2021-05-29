@@ -77,7 +77,8 @@ def main(context: click.Context, **_):
 
     filehelper.write_index_file(posts_to_write, output, config['index_mode'])
     filehelper.write_list_file(posts_to_write, output)
-    shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
+    filehelper.populate_css_file(output)
+
 
     if config['write_links_to_file'] != "None":
         filehelper.write_url_file(posts_to_write, output, config['write_links_to_file'])
