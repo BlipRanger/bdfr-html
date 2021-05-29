@@ -9,6 +9,7 @@ BDFR-HTML is a companion script that turns the output of the incredibly useful [
   - [Docker](#docker)
   - [Contributing](#contributing)
   - [Planned Features](#planned-features)
+  - [Screenshots](#screenshots)
 
 ## Installation
 
@@ -65,3 +66,21 @@ I am open to any and all help or criticism on this project! Please feel free to 
 - The ability to output more data/metrics
 - Docker support for automatically archiving subreddits/users
 - PyPi + Dockerhub package support
+
+## Screenshots
+
+**Example Post**
+
+![Post](/docs/screenshots/bdfr-html-post.jpg?raw=true "Example Post")
+
+**Default Index Page**
+
+![Default Index Page](/docs/screenshots/bdfr-html-default-index.jpg?raw=true "Default Index Page")
+
+**Lightweight Index Page**
+
+![Lightweight Index Page](/docs/screenshots/bdfr-html-lightweight-index.jpg?raw=true "Lightweight Index Page")
+
+**Old Reddit-Like Index Page**
+
+![Old Reddit-like Index Page](/docs/screenshots/bdfr-html-oldreddit-index.jpg?raw=true "Old Reddit Index Page")
