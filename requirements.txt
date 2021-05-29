@@ -10,3 +10,4 @@ requests>=2.25.1
 youtube-dl>=2021.3.14
 bdfr==2.1.1
 jinja2==3.0.0
+pillow>=8.0.0

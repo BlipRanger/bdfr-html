@@ -6,20 +6,20 @@ import os
 
 logger = logging.getLogger(__name__)
 
-
+#Get subreddit name from post
 def get_sub_from_post(post):
     if post.get('subreddit') is None:
         link = post['permalink']
         post['subreddit'] = link.split('/')[2]
     return post
 
-
+# Recover deleted posts via pushshift
 def recover_deleted_posts(post):
     if post['selftext'] == '[deleted]':
         post = recover_deleted_post(post)
     return post
 
-
+# Request a specific post to be recovered
 def recover_deleted_post(post):
     try:
         response = requests.get("https://api.pushshift.io/reddit/submission/search?ids={id}".format(id=post['id']))
@@ -32,7 +32,7 @@ def recover_deleted_post(post):
             post['author'] = recovered_post['author']
             post['url'] = recovered_post['url']
             post['recovered'] = True
-            logging.info('Recovered ' + post.get('id', '') + ' from pushshift')
+            logging.info(f"Recovered {post.get('id', '')} from pushshift")
     except Exception as e:
         logging.error(e)
     return post
@@ -49,7 +49,7 @@ def recover_deleted_comment(comment):
             comment['body'] = rev_comment['body']
             comment['score'] = rev_comment['score']
             comment['recovered'] = True
-            logging.info('Recovered ' + comment.get('id', '') + ' from pushshift')
+            logging.info(f"Recovered {comment.get('id', '')} from pushshift")
     except Exception as e:
         logging.error(e)
     return comment
@@ -85,7 +85,7 @@ def get_comment_context(post, input_folder):
             for f in fnames:
                 if post['id'] in f and f.endswith('.json'):
                     post = filehelper.load_json(os.path.join(dirpath, f))
-                    logging.debug("Post context created for: " + post['id'])
+                    logging.debug(f"Post context created for: {post['id']}")
 
         for comment in post["comments"]:
             if comment["id"] == id:
