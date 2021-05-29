@@ -9,6 +9,7 @@ BDFR-HTML is a companion script that turns the output of the incredibly useful [
   - [Docker](#docker)
   - [Contributing](#contributing)
   - [Planned Features](#planned-features)
+  - [Screenshots](#screenshots)
 
 ## Installation
 
