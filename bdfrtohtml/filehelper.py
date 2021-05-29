@@ -139,8 +139,7 @@ def empty_input_folder(input_folder):
             logger.debug(f"Deleted: {os.path.join(root, file)}")
         for dir in dirs:
             shutil.rmtree(os.path.join(root, dir))
-<<<<<<< HEAD
-            logger.debug("Removed: " + os.path.join(root, dir))
+            logger.debug(f"Deleted: {os.path.join(root, dir)}")
 
 def populate_css_file(output):
     css_output_path = os.path.join(output, 'style.css')
@@ -154,10 +153,6 @@ def populate_css_file(output):
                 file.write(data)
         except Exception as e:
             logger.error(e)
-           
-=======
-            logger.debug(f"Deleted: {os.path.join(root, dir)}")
-
 
 def generate_thumbnail(post, output_folder):
 
@@ -222,4 +217,3 @@ def generate_light_content(post, output_folder):
             image.save(output_filepath)
             post['light_content'] = os.path.join('light/', output_filename)
     return post
->>>>>>> 096e0c778893831df803a0dceafac4751c19a1de
