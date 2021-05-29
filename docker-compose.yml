@@ -3,28 +3,22 @@ services:
   bdfr-html:                                #Container which runs both bdfr and bdfr-html
     container_name: bdfr-html
     build: .                                #Builds from current folder, could also build from git repo
-    environment:                            #Defaults are defined in the Dockerfile
-      - BDFR_LIMIT=10                       #Number of saved posts to download
-      - BDFR_RECOVER_COMMENTS=False         #Should bdfr-html try to recover deleted comments from pushshift?
-      - BDFR_FREQ=15                        #How often should we pull saved content from reddit
-      - BDFR_OUT=/output                    #What folder internal to the container should the created files go
-      - BDFR_IN=/input                      #Where should bdfr place files pulled from reddit
-      - BDFR_ARCHIVE_CONTEXT=True           #Should bdfr-html also get post associated with saved comments
-      - RUN_BDFR=True                       #Run bdfr each time before running bdfr-html
-      - BDFRH_DELETE=False                  #Delete input media files after copying them to the media folder
+    environment:                            
       - BDFRH_LOGLEVEL=INFO                 #Either INFO or DEBUG for more verbose logs
     volumes:
-      - output:/output                      #Shared docker volume between the script container and the webserver, could also be mounted
-      - ./config:/root/.config/bdfr/        #Mounted folder where the bdfr config file lives
+      - output:/bdfrh/output                #Shared docker volume between the script container and the webserver, could also be mounted to local filesystem
+      #- ./output:/bdfrh/output             #An example of mounting to the local filesystem
+      - ./config/:/bdfrh/config             #Config files for both bdfr and bdfr-html
     ports:
-      - "7634:7634"
-  apache:                                   #Standard webserver serving the content located in the BDFR_OUT var
+      - "7634:7634"                         #Port needed for oauth
+  apache:                                   #Standard webserver serving the content of the output folder
     image: httpd:alpine
     container_name: bdfr-server
     ports:
-      - "80:80"                             #Ports can be redefined as needed
+      - "80:80"                             #Port for web server
     volumes:
       - output:/usr/local/apache2/htdocs/   #This should match the output volume or mount in the script container
+      #- output:/usr/local/apache2/htdocs/  #An example of mounting to the local filesystem
 
 volumes:
   output:

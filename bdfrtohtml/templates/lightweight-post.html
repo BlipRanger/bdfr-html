@@ -1,0 +1,38 @@
+<div class=post>
+
+    <div class="info {% if post.recovered %}recovered{% endif %}">
+        <div class=title>
+            <a href="{{ post.filename }}">
+                <h1>{{ post.title }}</h1>
+            </a>
+        </div>
+        <div class="links">
+            {% if post.paths %}<a href="{{ post.paths[0] }}">Local Link</a> | {% endif %}<a
+                href="{{ post.url }}">Content link </a> | <a href="https://www.reddit.com{{ post.permalink }}">Reddit
+                Link</a>
+        </div>
+        <div class="post_info">
+
+            <time>{{ post.created_utc | float_to_datetime }}</time><a href='https://reddit.com/r/{{ post.subreddit }}'><span
+                    class="subreddit">r/{{ post.subreddit }}</span></a><a
+                href='https://reddit.com/u/{{ post.author }}'><span class="user">u/{{ post.author }}</span></a>
+            <span title="{{ post.upvote_ratio }}" class="score">({{ post.score }})</span>{% if post.over_18 %}<span
+                class=mature> 18+ </span> {% endif %}
+        </div>
+    </div>
+    <div class=content>
+        {%- if post.selftext %}
+        {{ post.selftext | markdown}}
+        {%- endif %}
+        {% if post.light_content %}
+        <div class="light_container">
+            <a href="{{ post.paths[0] }}"><img src="{{ post.light_content }}">
+                {% if post.paths[0].endswith('.mp4') or post.paths[0].endswith('.m4a') or post.paths[0].endswith('.gif')
+                %}
+                <div class="icon">▶️</div>
+                {% endif %}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>

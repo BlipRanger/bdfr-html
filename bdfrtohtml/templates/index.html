@@ -1,0 +1,7 @@
+{% include 'header.html' %}
+{% for post in posts %}
+    {% if index_mode == "oldreddit" %}{% include 'oldreddit-post.html' %}
+    {% elif index_mode == "lightweight" %}{% include 'lightweight-post.html' %}
+    {% else %}{% include 'post.html' %}{% endif %}
+{% endfor %}
+{% include 'footer.html' %}

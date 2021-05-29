@@ -1,0 +1,18 @@
+bdfr:
+  limit: 1000                          #Number of saved posts to download (Max ~1000) (Per user)
+  run_bdfr: true                       #Run bdfr each time before running bdfr-html
+  frequency: 60                        #How often in minutes should we pull saved content from reddit
+  #users:                              #Download saved content for a list of users, you must auth each one
+  #  - User_1
+  #  - User_2
+  #merge_users: false                  #Merge the download and output folders of multi-users into a single folder
+bdfrhtml:
+  recover_comments: false              #Should bdfr-html try to recover deleted comments from pushshift?
+  recover_posts: false                 #Should bdfr-html try to recover deleted posts from pushshift?
+  output_folder: ./output              #What folder internal to the container should the created files go
+  input_folder: ./input                #Where should bdfr place files pulled from reddit
+  archive_context: false               #Should bdfr-html also get post associated with saved comments
+  delete_media: false                  #Delete input media files after copying them to the media folder
+  write_links_to_file: 'None'          #Write the urls for either None, All, or Webpages from posts to a file
+  generate_thumbnails: false           #Generate thumbnails for videos, helps with loading on mobile devices
+  index_mode: 'default'                #Choose from lightweight, default, and oldreddit style index pages
