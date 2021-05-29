@@ -41,7 +41,7 @@ To run the script with defaults:
 **start.py**
 The start.py is what (currently) powers the docker container's automation and steps through running both bdfr and bdfr-html in sequence at timed intervals. 
 Instead of running bdfrtohtml alone, you can run `python start.py` in a cloned copy of this repo to start up the automated process.
-The configuration for both bdfrtohtml and the start.py script itself can be found in the [config folder]('https://github.com/BlipRanger/bdfr-html/tree/main/bdfrtohtml').
+The configuration for both bdfrtohtml and the start.py script itself can be found in the [config folder](https://github.com/BlipRanger/bdfr-html/tree/main/bdfrtohtml/config).
 This script also includes multi-user support which can be found in the config file.
 
 ## Docker
