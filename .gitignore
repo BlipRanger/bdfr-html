@@ -7,3 +7,5 @@ __pycache__/
 .vscode/.ropeproject/config.py
 .vscode/.ropeproject/objectdb
 output/
+input/
+config/user_configs

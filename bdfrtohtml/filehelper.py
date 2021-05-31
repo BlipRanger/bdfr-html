@@ -6,10 +6,12 @@ import json
 import os
 import logging
 from bdfrtohtml import util
+import pkgutil
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-templateLoader = jinja2.FileSystemLoader(searchpath="./templates")
+templateLoader = jinja2.ChoiceLoader([jinja2.FileSystemLoader(searchpath="./bdfrtohtml/templates"), jinja2.PackageLoader('bdfrtohtml', 'templates')])
 templateEnv = jinja2.Environment(loader=templateLoader)
 templateEnv.add_extension('jinja2.ext.debug')
 templateEnv.filters["markdown"] = markdown.markdown
@@ -31,10 +33,10 @@ def import_posts(folder):
 
 
 # Write index page
-def write_index_file(post_list, output_folder):
+def write_index_file(post_list, output_folder, index_mode):
     template = templateEnv.get_template("index.html")
     with open(os.path.join(output_folder, "index.html"), 'w', encoding="utf-8") as file:
-        file.write(template.render(posts=post_list))
+        file.write(template.render(posts=post_list, index_mode=index_mode))
     logging.debug(f'Wrote {os.path.join(output_folder, "index.html")}')
 
 
@@ -139,6 +141,18 @@ def empty_input_folder(input_folder):
             shutil.rmtree(os.path.join(root, dir))
             logger.debug(f"Deleted: {os.path.join(root, dir)}")
 
+def populate_css_file(output):
+    css_output_path = os.path.join(output, 'style.css')
+    css_input_path = './templates/style.css'
+    if os.path.exists(css_input_path):
+        shutil.copyfile(css_input_path, css_output_path)
+    else:
+        try:
+            data = pkgutil.get_data(__name__, 'templates/style.css')
+            with open(css_output_path, 'wb') as file:
+                file.write(data)
+        except Exception as e:
+            logger.error(e)
 
 def generate_thumbnail(post, output_folder):
 
@@ -152,6 +166,10 @@ def generate_thumbnail(post, output_folder):
             filename = os.path.split(source_file)[1]
             filename = os.path.splitext(filename)[0] + "_thumb.jpg"
             output_path = os.path.join(thumbnail_folder, filename)
+            if os.path.isfile(output_path):
+                logging.debug(f"Using existing video thumbnail: {filename}")
+                post['thumbnail'] = filename
+                return post
             try:
                 # Generate a thumbnail from the first frame
                 command = ['ffmpeg', '-nostats', '-loglevel', '0', '-i', source_file, '-ss', 
@@ -162,4 +180,40 @@ def generate_thumbnail(post, output_folder):
                 logging.error('FFMPEG thumbnail failed: ' + str(e))
             post['thumbnail'] = filename
             logging.debug(f'Generated {output_path}')
+    return post
+
+
+def generate_light_content(post, output_folder):
+    thumbnail_content=['.m4a', '.mp4', '.jpg', '.jpeg', '.png', '.gif']
+    thumbnail_folder = os.path.join(output_folder, "thumbnails/")
+    light_folder = os.path.join(output_folder, 'light/')
+    assure_path_exists(thumbnail_folder)
+    assure_path_exists(light_folder)
+
+    source_file = post.get('paths')
+    if source_file is not None and len(source_file) > 0:
+        ext = os.path.splitext(source_file[0])[1]
+        if ext in thumbnail_content:
+            source_file = source_file[0]
+
+            if source_file.endswith('mp4') or source_file.endswith('m4a'):
+                if post.get('thumbnail') is None:
+                    post = generate_thumbnail(post, output_folder)
+                source_file = os.path.join(thumbnail_folder, post.get('thumbnail'))
+            else:
+                source_file = os.path.join(output_folder, source_file)
+
+            ext = os.path.splitext(source_file)[1]
+            output_filename = post['id'] + '_light' + ext
+            output_filepath = os.path.join(light_folder, output_filename)
+            if os.path.isfile(output_filepath):
+                logging.debug(f"Using existing thumbnail: {source_file}")
+                post['light_content'] = os.path.join('light/', output_filename)
+                return post
+
+            logging.debug(f"Created: {source_file}")
+            image = Image.open(source_file)
+            image.thumbnail((300,300))
+            image.save(output_filepath)
+            post['light_content'] = os.path.join('light/', output_filename)
     return post

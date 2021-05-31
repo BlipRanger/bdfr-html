@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @click.option('--archive_context', type=bool,
               help='Should we attempt to archive the contextual post for saved comments?')
 @click.option('--delete_media', type=bool, help='Should we delete the input media after creating the output?')
+@click.option('--index_mode', type=click.Choice(['default', 'lightweight', 'oldreddit']), help='Generate an index with no playing media and shrunk images?')
 @click.option('--write_links_to_file', type=click.Choice(['None', 'Webpages', 'All'], case_sensitive=False), 
               help='Should we write the links from posts to a text file for external consuption?')
 @click.option('--config', type=click.File('r'), help='Read in a config file')
@@ -64,6 +65,8 @@ def main(context: click.Context, **_):
 
             if config['generate_thumbnails']:
                 filehelper.generate_thumbnail(post, output)
+            if config['index_mode'] != "default":
+                filehelper.generate_light_content(post, output)
                 
             filehelper.write_post_to_file(post, output)
             posts_to_write.append(post)
@@ -72,9 +75,10 @@ def main(context: click.Context, **_):
 
     posts_to_write = sorted(posts_to_write, key=lambda d: d['created_utc'], reverse=True)
 
-    filehelper.write_index_file(posts_to_write, output)
+    filehelper.write_index_file(posts_to_write, output, config['index_mode'])
     filehelper.write_list_file(posts_to_write, output)
-    shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
+    filehelper.populate_css_file(output)
+
 
     if config['write_links_to_file'] != "None":
         filehelper.write_url_file(posts_to_write, output, config['write_links_to_file'])
