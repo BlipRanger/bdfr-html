@@ -6,7 +6,6 @@ RUN apt-get install ffmpeg -y
 
 WORKDIR /bdfrh
 COPY ./bdfrtohtml/ ./bdfrtohtml
-COPY ./templates/ ./templates
 COPY ./start.py ./start.py
 COPY ./requirements.txt ./requirements.txt
 COPY ./config/config.yml ./config/config.yml

@@ -49,4 +49,4 @@ to the project. Any intent to deviate the project from its original purpose
 of existence will constitute grounds for remedial action which may include
 expulsion from the project.
 
-This document is the Code of Merit (http://code-of-merit.org), version 1.0.
+This document is the Code of Merit (https://gitlab.com/rosarior/awesome-django/blob/master/CODE_OF_MERIT.md), version 1.0.
