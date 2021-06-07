@@ -31,7 +31,7 @@ def generate_default_config():
     }
     return cfg
 
-
+#Either download or write hardcode some default bdfr configs (a bit messy)
 def get_bdfr_config():
     r = requests.get("https://raw.githubusercontent.com/aliparlakci/bulk-downloader-for-reddit/master/bdfr/default_config.cfg")
     logging.info("Downloading default config file from github")
@@ -39,7 +39,7 @@ def get_bdfr_config():
         logging.info("Successfully acquired bdfr config from github")
         return bytes.decode(r.content)
     else:
-        logging.info("Generated config manually instead")
+        logging.info("Could not download, generated bdfr config instead")
         return """[DEFAULT]
         client_id = U-6gk4ZCh3IeNQ
         client_secret = 7CZHY6AmKweZME5s50SfDGylaPg
