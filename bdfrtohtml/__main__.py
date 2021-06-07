@@ -37,7 +37,7 @@ def main(context: click.Context, **_):
     if context.params.get('config'):
         config = util.load_config(context.params.get('config'))
     else:
-        config = util.generate_default_config()
+        config = util.generate_default_config()["bdfrhtml"]
     config = util.process_click_arguments(config, context)
     logging.debug(config)
 

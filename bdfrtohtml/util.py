@@ -1,6 +1,8 @@
+import logging
 import time
 import yaml
 import click
+import requests
 
 # Load in a yaml config file
 def load_config(config_file):
@@ -9,19 +11,43 @@ def load_config(config_file):
 
 # Default settings
 def generate_default_config():
-  cfg = {
-    'recover_comments': False,      
-    'recover_posts': False, 
-    'output_folder': './output',
-    'input_folder': './input', 
-    'archive_context': False,           
-    'delete_media': False,                                  
-    'write_links_to_file': 'None',
-    'generate_thumbnails': False,
-    'index_mode': 'default'
-  }
-  return cfg
+    cfg = {
+        'bdfr': {
+            'limit': 1000,                          
+            'run_bdfr': True,               
+            'frequency': 60
+        },                        
+        'bdfrhtml': {
+            'recover_comments': False,      
+            'recover_posts': False, 
+            'output_folder': './output',
+            'input_folder': './input', 
+            'archive_context': False,           
+            'delete_media': False,                                  
+            'write_links_to_file': 'None',
+            'generate_thumbnails': False,
+            'index_mode': 'default'
+        }
+    }
+    return cfg
 
+
+def get_bdfr_config():
+    r = requests.get("https://raw.githubusercontent.com/aliparlakci/bulk-downloader-for-reddit/master/bdfr/default_config.cfg")
+    logging.info("Downloading default config file from github")
+    if r.status_code == 200:
+        logging.info("Successfully acquired bdfr config from github")
+        return bytes.decode(r.content)
+    else:
+        logging.info("Generated config manually instead")
+        return """[DEFAULT]
+        client_id = U-6gk4ZCh3IeNQ
+        client_secret = 7CZHY6AmKweZME5s50SfDGylaPg
+        scopes = identity, history, read, save
+        backup_log_count = 3
+        max_wait_time = 120
+        time_format = ISO"""        
+        
 # Used in the jinja2 template
 def float_to_datetime(value):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(value))
