@@ -18,4 +18,4 @@ RUN pip install -r requirements.txt
 RUN mkdir input
 RUN mkdir output
 
-CMD python start.py
+CMD python -m bdfrtohtml automate
