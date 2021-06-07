@@ -56,14 +56,14 @@ def automate():
 
                 if bdfr_cfg['run_bdfr']:
                     logging.info(f"Now running BDFR for {user}")
-                    subprocess.call(["python", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
+                    subprocess.call(["python3", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
                                     "--authenticate", input_folder, "--config", bdfr_config_file])
-                    subprocess.call(["python", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
+                    subprocess.call(["python3", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
                                     "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", input_folder, "--config", bdfr_config_file])
                 if not merge_users:                     
-                    subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
+                    subprocess.call(["python3", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
             if merge_users:                     
-                subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
+                subprocess.call(["python3", "-m", "bdfrtohtml", "--config", config_path, "--input_folder", input_folder, "--output_folder", output_folder])
             logging.info(f"Runs complete, now waiting for {int(bdfr_cfg['frequency'])} minutes before next run.")
             time.sleep(int(bdfr_cfg['frequency']*60))
             
@@ -75,10 +75,10 @@ def automate():
         while True:
             if bdfr_cfg['run_bdfr']:
                 logging.info(f"Now running BDFR for saved posts.")
-                subprocess.call(["python", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
+                subprocess.call(["python3", "-m", "bdfr", "archive", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
                                 "--authenticate", input_folder, "--config", default_config])
-                subprocess.call(["python", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
+                subprocess.call(["python3", "-m", "bdfr", "download", "--user", "me", "--saved", "-L", str(bdfr_cfg['limit']),
                                 "--exclude-id-file", idList, "--authenticate", "--file-scheme", "{POSTID}", input_folder, "--config", default_config])
-            subprocess.call(["python", "-m", "bdfrtohtml", "--config", config_path])
+            subprocess.call(["python3", "-m", "bdfrtohtml", "--config", config_path])
             logging.info(f"Runs complete, now waiting for {int(bdfr_cfg['frequency'])} minutes before next run.")
             time.sleep(int(bdfr_cfg['frequency'])*60)
