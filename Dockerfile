@@ -6,7 +6,6 @@ RUN apt-get install ffmpeg -y
 
 WORKDIR /bdfrh
 COPY ./bdfrtohtml/ ./bdfrtohtml
-COPY ./start.py ./start.py
 COPY ./requirements.txt ./requirements.txt
 COPY ./config/config.yml ./config/config.yml
 COPY ./config/default_bdfr_config.cfg ./config/default_bdfr_config.cfg
@@ -18,4 +17,4 @@ RUN pip install -r requirements.txt
 RUN mkdir input
 RUN mkdir output
 
-CMD python start.py
+CMD python -m bdfrtohtml automate
