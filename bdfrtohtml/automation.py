@@ -14,10 +14,7 @@ logging.basicConfig(level=LOGLEVEL)
 # Load in a yaml config file or make one and load it in
 def load_config(config_file):
     if not os.path.exists(config_file):
-        assure_path_exists("./config/")
-        config = bdfrtohtml.util.generate_default_config()
-        with open(config_file, "w") as cfg:
-             yaml.dump(config, cfg, default_flow_style=False)      
+        generate_bdfrhtml_config_file()
     with open(config_file,'r') as stream:
         cfg = yaml.safe_load(stream)
     return cfg
@@ -31,24 +28,45 @@ def assure_path_exists(path):
         logging.debug(f"Created {dir}")
     return dir
 
-#Make sure we have a config file for bdfr
+# Make sure we have a config file for bdfr
 def create_or_copy_config(config_filepath):
-    source_config = "config/default_bdfr_config.cfg"
+    source_config = generate_bdfr_config_file()
+    assure_path_exists("config/user_configs")
     if not os.path.exists(config_filepath):
-        assure_path_exists("config/user_configs")
-        if not os.path.exists(source_config):
-            content = bdfrtohtml.util.get_bdfr_config()
-            with open(source_config, "w") as cfg:
-                cfg.write(content)
-        shutil.copyfile("config/default_bdfr_config.cfg", config_filepath)
-        return True
+        shutil.copyfile(source_config, config_filepath)
+    return True
 
-#In the case of an existing sample index file, remove it
+# In the case of an existing sample index file, remove it
 def remove_default_index(output_folder):
     filepath = os.path.join(output_folder, 'index.html')
     if os.path.exists(filepath):
         os.remove(filepath)
 
+# Create a default config file for bdfr if there isn't one
+def generate_bdfr_config_file():
+    assure_path_exists("./config/")
+    source_config = "config/default_bdfr_config.cfg"
+    if not os.path.exists(source_config):
+        content = bdfrtohtml.util.get_bdfr_config()
+        with open(source_config, "w") as cfg:
+            cfg.write(content)
+    return source_config
+
+# Create a default bdfrhtml config file if there isn't one
+def generate_bdfrhtml_config_file():
+    assure_path_exists("./config/")
+    config_file = "config/config.yml"
+    config = bdfrtohtml.util.generate_default_config()
+    with open(config_file, "w") as cfg:
+            yaml.dump(config, cfg, default_flow_style=False)    
+    return config_file
+
+# Make both config files
+def generate_configs():
+    generate_bdfrhtml_config_file()
+    generate_bdfr_config_file()
+
+# The automated process of downloading and merging posts
 def automate():
     config_path = "config/config.yml"
     config = load_config(config_path)

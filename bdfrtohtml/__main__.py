@@ -93,8 +93,12 @@ def main(context: click.Context, **_):
     logging.info("BDFR-HTML run complete.")
 
 @main.command("automate")
-def run_automation():
-    automation.automate()
+@click.option('--generate_config', type=bool, default=False, help='Just generate the config files for automation')
+def run_automation(generate_config):
+    if generate_config:
+        automation.generate_configs()
+    else:
+        automation.automate()
 
 
 if __name__ == '__main__':
