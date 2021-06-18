@@ -3,6 +3,7 @@ import subprocess
 import requests
 from bdfrtohtml import filehelper
 import os
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +77,7 @@ def get_comment_context(post, input_folder):
 
     if id is not None:
         try:
-            subprocess.call(["python", "-m", "bdfr", "archive", "-l", post['permalink'], context_folder])
-            subprocess.call(["python", "-m", "bdfr", "download", "-l", post['permalink'], "--file-scheme", "{POSTID}",
+            subprocess.call([sys.executable, "-m", "bdfr", "clone", "-l", post['permalink'], "--file-scheme", "{POSTID}",
                              context_folder])
         except Exception as e:
             logging.error(e)

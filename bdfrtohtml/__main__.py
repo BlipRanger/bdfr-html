@@ -1,7 +1,7 @@
 # __main__.py
 
 __author__ = "BlipRanger"
-__version__ = "1.3.1"
+__version__ = "1.4.1"
 __license__ = "GNU GPLv3"
 
 import os
@@ -9,14 +9,14 @@ import click
 import shutil
 from bdfrtohtml import filehelper
 from bdfrtohtml import posthelper
+from bdfrtohtml import automation
 from bdfrtohtml import util
 import logging
 import copy
 
 logger = logging.getLogger(__name__)
 
-
-@click.command()
+@click.group(invoke_without_command=True)
 @click.option('--input_folder', default=None, help='The folder where the download and archive results have been saved to')
 @click.option('--output_folder', default=None, help='Folder where the HTML results should be created.')
 @click.option('--recover_comments', type=bool, help='Should we attempt to recover deleted comments?')
@@ -32,10 +32,12 @@ logger = logging.getLogger(__name__)
 @click.pass_context
 def main(context: click.Context, **_):
 
+    if context.invoked_subcommand is not None:
+        return
     if context.params.get('config'):
         config = util.load_config(context.params.get('config'))
     else:
-        config = util.generate_default_config()
+        config = util.generate_default_config()["bdfrhtml"]
     config = util.process_click_arguments(config, context)
     logging.debug(config)
 
@@ -77,7 +79,8 @@ def main(context: click.Context, **_):
 
     filehelper.write_index_file(posts_to_write, output, config['index_mode'])
     filehelper.write_list_file(posts_to_write, output)
-    shutil.copyfile('./templates/style.css', os.path.join(output, 'style.css'))
+    filehelper.populate_css_file(output)
+
 
     if config['write_links_to_file'] != "None":
         filehelper.write_url_file(posts_to_write, output, config['write_links_to_file'])
@@ -88,6 +91,14 @@ def main(context: click.Context, **_):
 
 
     logging.info("BDFR-HTML run complete.")
+
+@main.command("automate")
+@click.option('--generate_config', type=bool, default=False, help='Just generate the config files for automation')
+def run_automation(generate_config):
+    if generate_config:
+        automation.generate_configs()
+    else:
+        automation.automate()
 
 
 if __name__ == '__main__':
