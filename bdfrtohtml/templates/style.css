@@ -414,5 +414,5 @@ input[type='checkbox'] {
 }
 
 pre {
-    overflow: auto;
+    overflow: scroll;
 }
