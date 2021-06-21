@@ -68,7 +68,7 @@ def main(context: click.Context, **_):
             if config['generate_thumbnails']:
                 filehelper.generate_thumbnail(post, output)
             if config['index_mode'] != "default":
-                filehelper.generate_light_content(post, output)
+                filehelper.generate_light_content(post, output, config['index_mode'])
                 
             filehelper.write_post_to_file(post, output)
             posts_to_write.append(post)

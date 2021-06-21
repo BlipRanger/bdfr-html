@@ -183,7 +183,7 @@ def generate_thumbnail(post, output_folder):
     return post
 
 
-def generate_light_content(post, output_folder):
+def generate_light_content(post, output_folder, index_mode):
     thumbnail_content=['.m4a', '.mp4', '.jpg', '.jpeg', '.png', '.gif']
     thumbnail_folder = os.path.join(output_folder, "thumbnails/")
     light_folder = os.path.join(output_folder, 'light/')
@@ -213,7 +213,10 @@ def generate_light_content(post, output_folder):
 
             logging.debug(f"Created: {source_file}")
             image = Image.open(source_file)
-            image.thumbnail((300,300))
+            if index_mode == "oldreddit":
+                image.thumbnail((70,70))
+            else:
+                image.thumbnail((300,300))
             image.save(output_filepath)
             post['light_content'] = os.path.join('light/', output_filename)
     return post
