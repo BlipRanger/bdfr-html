@@ -8,7 +8,7 @@ setup(
     author='BlipRanger',
     author_email='blipranger@shrubbery.co',
     url='https://github.com/BlipRanger/bdfr-html',
-    download_url='https://github.com/BlipRanger/bdfr-html/releases/tag/v1.3.0',
+    download_url='https://github.com/BlipRanger/bdfr-html/releases/latest',
     keywords=['bdfr', 'reddit', 'downloader'],
     classifiers=[],
     package_data={
@@ -25,7 +25,7 @@ setup(
     'pyyaml>=5.4.1',
     'requests>=2.25.1',
     'youtube-dl>=2021.3.14',
-    'bdfr==2.2',
+    'bdfr>=2.5.2',
     'jinja2==3.0.0',
     'pillow>=8.0.0'
     ]
